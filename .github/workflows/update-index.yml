@@ -5,7 +5,7 @@ on:
     paths:
       - '**/*'  # Memicu workflow saat ada perubahan di folder manapun
   schedule:
-    - cron: '*/5 * * * *'  # Opsional: Menjalankan setiap 5 menit (jika ada perubahan otomatis setiap interval)
+    - cron: '*/5 * * * *'  # Opsional: Menjalankan setiap 5 menit
 
 jobs:
   update-html:
@@ -20,7 +20,6 @@ jobs:
         run: |
           # Mendapatkan semua folder kecuali .github dan node_modules, lalu menghapus trailing slash
           FOLDERS=$(ls -d */ | grep -v '\.github\|node_modules' | sed 's/\/$//')
-          # Simpan folder dengan format dipisahkan spasi (untuk bisa digunakan oleh GitHub Actions)
           echo "folders=$(echo "$FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
 
       - name: Check current folders in index.html
@@ -32,7 +31,6 @@ jobs:
           else
             CURRENT_FOLDERS=""
           fi
-          # Simpan daftar folder yang sudah ada ke dalam environment variable
           echo "current_folders=$(echo "$CURRENT_FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
 
       - name: Sync folders in index.html
@@ -57,7 +55,6 @@ jobs:
           TEMP_INDEX_HTML=$(mktemp)
           while read -r folder; do
             if [[ " ${folders} " =~ " ${folder} " ]]; then
-              # Tetap tambahkan folder yang masih ada di repository ke file baru
               echo "<li><a href=\"$folder/\">${folder}</a></li>" >> "$TEMP_INDEX_HTML"
             else
               echo "Removing folder $folder from index.html."
@@ -65,21 +62,20 @@ jobs:
           done < <(grep -oP '(?<=<a href=\").*?(?=\/\")' index.html)
 
           # Gantikan placeholder dengan daftar folder yang diperbarui di index.html
-          # Pastikan untuk menggunakan delimiter yang tidak ada dalam string
           sed -i.bak "/<!-- FOLDER_LIST_PLACEHOLDER -->/r $TEMP_INDEX_HTML" index.html
           
-          # Tambahkan folder baru yang belum ada, hanya jika ada yang baru ditambahkan
+          # Tambahkan folder baru yang belum ada
           if [ -n "$UPDATED_FOLDER_LIST" ]; then
             sed -i.bak "s|<!-- FOLDER_LIST_PLACEHOLDER -->|<!-- FOLDER_LIST_PLACEHOLDER -->\n$UPDATED_FOLDER_LIST|" index.html
           fi
 
-          # Check if index.html has changed
+          # Cek jika tidak ada perubahan pada index.html
           if git diff --quiet; then
             echo "No changes to index.html. Skipping commit."
             exit 0
           fi
 
-          # Commit and push changes
+          # Commit dan push perubahan
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git add index.html
