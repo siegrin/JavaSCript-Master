@@ -13,21 +13,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Get newest folder
-        id: get_newest_folder
+      - name: Get all folders
+        id: get_all_folders
         run: |
-          NEWEST_FOLDER=$(ls -td */ | head -1)
-          echo "newest_folder=${NEWEST_FOLDER%/}" >> $GITHUB_ENV
+          FOLDERS=$(ls -d */)
+          echo "all_folders=${FOLDERS}" >> $GITHUB_ENV
 
-      - name: Update README.md
+      - name: Display all folders in the log
+        run: echo "All folders in the repository are: ${{ env.all_folders }}"
+
+      - name: Update README.md with all folders
         run: |
-          if [ -z "${{ env.newest_folder }}" ]; then
+          if [ -z "${{ env.all_folders }}" ]; then
             echo "No folders found."
             exit 0
           fi
-          sed -i.bak "s/^## Folders.*$/## Folders\n\n- ${{ env.newest_folder }}/" README.md
+          sed -i.bak "s/^## Folders.*$/## Folders\n\n${{ env.all_folders }}/" README.md
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git add README.md
-          git commit -m "Update README.md with the newest folder"
+          git commit -m "Update README.md with all folders"
           git push
