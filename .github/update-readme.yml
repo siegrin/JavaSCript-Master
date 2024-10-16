@@ -1,0 +1,33 @@
+name: Update README.md
+
+on:
+  push:
+    paths:
+      - '**/*' # Menjalankan aksi ini pada setiap push
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Get newest folder
+        id: get_newest_folder
+        run: |
+          NEWEST_FOLDER=$(ls -td */ | head -1)
+          echo "newest_folder=${NEWEST_FOLDER%/}" >> $GITHUB_ENV
+
+      - name: Update README.md
+        run: |
+          if [ -z "${{ env.newest_folder }}" ]; then
+            echo "No folders found."
+            exit 0
+          fi
+          sed -i.bak "s/^## Folders.*$/## Folders\n\n- ${{ env.newest_folder }}/" README.md
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add README.md
+          git commit -m "Update README.md with the newest folder"
+          git push
