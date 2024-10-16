@@ -65,12 +65,12 @@ jobs:
           done < <(grep -oP '(?<=<a href=\").*?(?=\/\")' index.html)
 
           # Gantikan placeholder dengan daftar folder yang diperbarui di index.html
+          # Pastikan untuk menggunakan delimiter yang tidak ada dalam string
           sed -i.bak "/<!-- FOLDER_LIST_PLACEHOLDER -->/r $TEMP_INDEX_HTML" index.html
           
-          # Tambahkan folder baru yang belum ada
+          # Tambahkan folder baru yang belum ada, hanya jika ada yang baru ditambahkan
           if [ -n "$UPDATED_FOLDER_LIST" ]; then
-            # Hapus placeholder sebelum menambahkan folder baru
-            sed -i.bak "s/<!-- FOLDER_LIST_PLACEHOLDER -->/<!-- FOLDER_LIST_PLACEHOLDER -->\n$UPDATED_FOLDER_LIST/" index.html
+            sed -i.bak "s|<!-- FOLDER_LIST_PLACEHOLDER -->|<!-- FOLDER_LIST_PLACEHOLDER -->\n$UPDATED_FOLDER_LIST|" index.html
           fi
 
           # Check if index.html has changed
