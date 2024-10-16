@@ -23,21 +23,38 @@ jobs:
           # Simpan folder dengan format dipisahkan spasi (untuk bisa digunakan oleh GitHub Actions)
           echo "folders=$(echo "$FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
 
-      - name: Check for changes and update index.html
+      - name: Check current folders in index.html
+        id: read_html
+        run: |
+          # Ambil semua folder yang sudah ada di index.html
+          CURRENT_FOLDERS=$(grep -oP '(?<=<a href=\").*?(?=\/\")' index.html)
+          # Simpan daftar folder yang sudah ada
+          echo "current_folders=$(echo "$CURRENT_FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
+
+      - name: Add new folders only
         run: |
           if [ -z "${{ env.folders }}" ]; then
             echo "No folders found."
             exit 0
           fi
 
-          # Generate folder list for HTML
-          FOLDER_LIST=""
+          # Generate folder list for HTML, but only for new folders
+          NEW_FOLDER_LIST=""
           for folder in ${{ env.folders }}; do
-            FOLDER_LIST="$FOLDER_LIST<li><a href=\"$folder/\">${folder}</a></li>\n"
+            if [[ ! " ${CURRENT_FOLDERS} " =~ " ${folder} " ]]; then
+              # Folder belum ada, tambahkan ke list baru
+              NEW_FOLDER_LIST="$NEW_FOLDER_LIST<li><a href=\"$folder/\">${folder}</a></li>\n"
+            fi
           done
 
-          # Append folder list below the FOLDER_LIST_PLACEHOLDER without removing the placeholder
-          awk '/<!-- FOLDER_LIST_PLACEHOLDER -->/ { print; print FOLDER_LIST; next }1' FOLDER_LIST="$FOLDER_LIST" index.html > index.html.new
+          # If no new folders were found, exit
+          if [ -z "$NEW_FOLDER_LIST" ]; then
+            echo "No new folders to add. Skipping update."
+            exit 0
+          fi
+
+          # Append new folder list below the FOLDER_LIST_PLACEHOLDER without removing the placeholder
+          awk '/<!-- FOLDER_LIST_PLACEHOLDER -->/ { print; print NEW_FOLDER_LIST; next }1' NEW_FOLDER_LIST="$NEW_FOLDER_LIST" index.html > index.html.new
           mv index.html.new index.html
 
           # Check if index.html has changed
@@ -50,5 +67,5 @@ jobs:
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git add index.html
-          git commit -m "Update index.html with project folders"
+          git commit -m "Update index.html with new project folders"
           git push
