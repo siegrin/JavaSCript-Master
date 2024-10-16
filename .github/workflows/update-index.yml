@@ -18,12 +18,8 @@ jobs:
       - name: Get all folders
         id: get_folders
         run: |
-          # Dapatkan daftar folder di tingkat atas
-          FOLDERS=$(find . -maxdepth 1 -type d ! -name '.git' ! -name 'node_modules' ! -name '.*')
+          FOLDERS=$(ls -d */ | grep -v '\.github\|node_modules')
           echo "folders=${FOLDERS}" >> $GITHUB_ENV
-
-      - name: Debug folder list
-        run: echo "Detected folders: ${{ env.folders }}"
 
       - name: Check for changes and update index.html
         run: |
@@ -35,12 +31,11 @@ jobs:
           # Generate folder list for HTML
           FOLDER_LIST=""
           for folder in ${{ env.folders }}; do
-            FOLDER_NAME=$(basename "$folder")
-            FOLDER_LIST="$FOLDER_LIST<li><a href=\"$FOLDER_NAME\">$FOLDER_NAME</a></li>\n"
+            FOLDER_LIST="$FOLDER_LIST<li><a href=\"$folder\">${folder%/}</a></li>\n"
           done
 
           # Replace placeholder in HTML with folder list
-          sed -i.bak "s|<!-- Placeholder untuk daftar folder -->|${FOLDER_LIST}|" index.html
+          sed -i.bak "s|<!-- FOLDER_LIST_PLACEHOLDER -->|${FOLDER_LIST}|" index.html
 
           # Check if index.html has changed
           if git diff --quiet; then
