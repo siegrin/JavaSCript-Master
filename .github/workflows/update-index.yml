@@ -64,7 +64,7 @@ jobs:
           # Gantikan placeholder dengan daftar folder yang diperbarui di index.html
           sed -i.bak "/<!-- FOLDER_LIST_PLACEHOLDER -->/r $TEMP_INDEX_HTML" index.html
           
-          # Tambahkan folder baru yang belum ada
+          # Tambahkan folder baru yang belum ada, jika ada
           if [ -n "$UPDATED_FOLDER_LIST" ]; then
             sed -i.bak "s|<!-- FOLDER_LIST_PLACEHOLDER -->|<!-- FOLDER_LIST_PLACEHOLDER -->\n$UPDATED_FOLDER_LIST|" index.html
           fi
