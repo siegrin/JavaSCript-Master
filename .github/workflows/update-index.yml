@@ -1,57 +1,51 @@
-name: Detect All Folders
+name: Update HTML with Folders
 
 on:
   push:
     paths:
-      - '**/'  # Mendeteksi semua perubahan di dalam folder
+      - '**/*'  # Memicu workflow saat ada perubahan di folder manapun
+  schedule:
+    - cron: '*/1 * * * *'  # Opsional: Menjalankan setiap menit
 
 jobs:
   update-html:
-    runs-on: ubuntu-latest  # Menentukan OS yang digunakan untuk menjalankan job
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2  # Mengambil konten repository
+        uses: actions/checkout@v2
 
-      - name: Generate folder list
+      - name: Get all folders
+        id: get_folders
         run: |
-          # Nama file HTML yang akan diperbarui
-          html_file="index.html"  # Ganti dengan nama file HTML Anda
+          FOLDERS=$(ls -d */ | grep -v '\.github\|node_modules')
+          echo "folders=${FOLDERS}" >> $GITHUB_ENV
 
-          # Memeriksa apakah file index.html ada
-          if [ ! -f "$html_file" ]; then
-            echo "File $html_file not found!"  # Pesan jika file tidak ditemukan
-            exit 1  # Keluar dari script jika file tidak ada
+      - name: Check for changes and update index.html
+        run: |
+          if [ -z "${{ env.folders }}" ]; then
+            echo "No folders found."
+            exit 0
           fi
-
-          # Membaca konten file HTML
-          html_content=$(<"$html_file")
-
-          # Menyiapkan variabel untuk daftar folder
-          folder_list=""
-
-          # Mencari semua folder dan membuat list
-          for dir in $(find . -type d); do
-            folder_list+="<li>${dir}</li>\n"  # Menambahkan folder ke dalam daftar
+          
+          # Generate folder list for HTML
+          FOLDER_LIST=""
+          for folder in ${{ env.folders }}; do
+            FOLDER_LIST="$FOLDER_LIST<li><a href=\"$folder\">${folder%/}</a></li>\n"
           done
 
-          # Mengganti placeholder dengan daftar folder
-          updated_html=${html_content//<!-- FOLDER_LIST_PLACEHOLDER -->/$folder_list}
+          # Replace placeholder in HTML with folder list
+          sed -i.bak "s|<!-- FOLDER_LIST_PLACEHOLDER -->|${FOLDER_LIST}|" index.html
 
-          # Menyimpan hasil ke file yang sama
-          echo -e "$updated_html" > "$html_file"  # Menggunakan -e untuk menafsirkan karakter escape
-
-      - name: Commit changes
-        run: |
-          git config --local user.name "github-actions"  # Mengonfigurasi nama pengguna Git
-          git config --local user.email "github-actions@github.com"  # Mengonfigurasi email pengguna
-          
-          # Memeriksa apakah ada perubahan untuk di-commit
-          if ! git diff --quiet; then  # Memeriksa apakah ada perbedaan
-            git add "$html_file"  # Menambahkan file HTML ke staging area
-            git commit -m "Update folder list in index.html"  # Melakukan commit perubahan
-          else
-            echo "No changes to commit"  # Pesan jika tidak ada perubahan
+          # Check if index.html has changed
+          if git diff --quiet; then
+            echo "No changes to index.html. Skipping commit."
+            exit 0
           fi
-          
-          git push  # Mengirimkan perubahan ke repository
+
+          # If changes exist, commit and push the update
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add index.html
+          git commit -m "Update index.html with project folders"
+          git push
