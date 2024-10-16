@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - '**/*'
+  schedule:
+    - cron: '*/1 * * * *' # Runs every minute
 
 jobs:
   update-html:
@@ -34,6 +36,12 @@ jobs:
 
           # Replace placeholder in HTML with folder list
           sed -i.bak "s|<!-- FOLDER_LIST_PLACEHOLDER -->|${FOLDER_LIST}|" index.html
+
+          # Check if index.html has changed
+          if git diff --quiet; then
+            echo "No changes to index.html. Skipping commit."
+            exit 0
+          fi
 
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
