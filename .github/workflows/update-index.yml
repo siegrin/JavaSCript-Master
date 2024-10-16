@@ -19,6 +19,11 @@ jobs:
           html_file="index.html"  # Ganti dengan nama file HTML Anda
 
           # Membaca konten file HTML
+          if [ ! -f "$html_file" ]; then
+            echo "File $html_file not found!"
+            exit 1  # Keluar jika file tidak ada
+          fi
+
           html_content=$(<"$html_file")
 
           # Mencari semua folder dan membuat list
@@ -37,6 +42,13 @@ jobs:
         run: |
           git config --local user.name "github-actions"
           git config --local user.email "github-actions@github.com"
-          git add "$html_file"
-          git commit -m "Update folder list in index.html" || echo "No changes to commit"
+          
+          # Memeriksa apakah ada perubahan untuk di-commit
+          if ! git diff --quiet; then
+            git add "$html_file"
+            git commit -m "Update folder list in index.html"
+          else
+            echo "No changes to commit"
+          fi
+          
           git push
