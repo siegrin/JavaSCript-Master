@@ -36,8 +36,9 @@ jobs:
             FOLDER_LIST="$FOLDER_LIST<li><a href=\"$folder/\">${folder}</a></li>\n"
           done
 
-          # Replace placeholder in HTML with folder list
-          sed -i.bak "s|<!-- FOLDER_LIST_PLACEHOLDER -->|${FOLDER_LIST}|" index.html
+          # Append folder list below the FOLDER_LIST_PLACEHOLDER without removing the placeholder
+          awk '/<!-- FOLDER_LIST_PLACEHOLDER -->/ { print; print FOLDER_LIST; next }1' FOLDER_LIST="$FOLDER_LIST" index.html > index.html.new
+          mv index.html.new index.html
 
           # Check if index.html has changed
           if git diff --quiet; then
