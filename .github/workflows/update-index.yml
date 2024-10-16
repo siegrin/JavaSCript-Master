@@ -7,48 +7,51 @@ on:
 
 jobs:
   update-html:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Menentukan OS yang digunakan untuk menjalankan job
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2  # Mengambil konten repository
 
       - name: Generate folder list
         run: |
           # Nama file HTML yang akan diperbarui
           html_file="index.html"  # Ganti dengan nama file HTML Anda
 
-          # Membaca konten file HTML
+          # Memeriksa apakah file index.html ada
           if [ ! -f "$html_file" ]; then
-            echo "File $html_file not found!"
-            exit 1  # Keluar jika file tidak ada
+            echo "File $html_file not found!"  # Pesan jika file tidak ditemukan
+            exit 1  # Keluar dari script jika file tidak ada
           fi
 
+          # Membaca konten file HTML
           html_content=$(<"$html_file")
 
-          # Mencari semua folder dan membuat list
+          # Menyiapkan variabel untuk daftar folder
           folder_list=""
+
+          # Mencari semua folder dan membuat list
           for dir in $(find . -type d); do
-            folder_list+="<li>${dir}</li>\n"
+            folder_list+="<li>${dir}</li>\n"  # Menambahkan folder ke dalam daftar
           done
 
           # Mengganti placeholder dengan daftar folder
           updated_html=${html_content//<!-- FOLDER_LIST_PLACEHOLDER -->/$folder_list}
 
           # Menyimpan hasil ke file yang sama
-          echo -e "$updated_html" > "$html_file"
+          echo -e "$updated_html" > "$html_file"  # Menggunakan -e untuk menafsirkan karakter escape
 
       - name: Commit changes
         run: |
-          git config --local user.name "github-actions"
-          git config --local user.email "github-actions@github.com"
+          git config --local user.name "github-actions"  # Mengonfigurasi nama pengguna Git
+          git config --local user.email "github-actions@github.com"  # Mengonfigurasi email pengguna
           
           # Memeriksa apakah ada perubahan untuk di-commit
-          if ! git diff --quiet; then
-            git add "$html_file"
-            git commit -m "Update folder list in index.html"
+          if ! git diff --quiet; then  # Memeriksa apakah ada perbedaan
+            git add "$html_file"  # Menambahkan file HTML ke staging area
+            git commit -m "Update folder list in index.html"  # Melakukan commit perubahan
           else
-            echo "No changes to commit"
+            echo "No changes to commit"  # Pesan jika tidak ada perubahan
           fi
           
-          git push
+          git push  # Mengirimkan perubahan ke repository
