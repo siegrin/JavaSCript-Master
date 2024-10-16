@@ -19,7 +19,7 @@ jobs:
         id: get_folders
         run: |
           # Dapatkan daftar folder di tingkat atas
-          FOLDERS=$(find . -maxdepth 1 -type d ! -name '.git' ! -name 'node_modules' ! -name '.*')  # Menghindari folder tersembunyi
+          FOLDERS=$(find . -maxdepth 1 -type d ! -name '.git' ! -name 'node_modules' ! -name '.*')
           echo "folders=${FOLDERS}" >> $GITHUB_ENV
 
       - name: Debug folder list
@@ -35,7 +35,6 @@ jobs:
           # Generate folder list for HTML
           FOLDER_LIST=""
           for folder in ${{ env.folders }}; do
-            # Ambil nama folder tanpa './' di depannya
             FOLDER_NAME=$(basename "$folder")
             FOLDER_LIST="$FOLDER_LIST<li><a href=\"$FOLDER_NAME\">$FOLDER_NAME</a></li>\n"
           done
