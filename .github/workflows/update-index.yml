@@ -1,4 +1,4 @@
-name: Update HTML with Folders
+name: Update HTML with Folders Automatically
 
 on:
   push:
@@ -28,10 +28,10 @@ jobs:
         run: |
           # Ambil semua folder yang sudah ada di index.html
           CURRENT_FOLDERS=$(grep -oP '(?<=<a href=\").*?(?=\/\")' index.html)
-          # Simpan daftar folder yang sudah ada
+          # Simpan daftar folder yang sudah ada ke dalam environment variable
           echo "current_folders=$(echo "$CURRENT_FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
 
-      - name: Add new folders only
+      - name: Add new folders only (skip already existing ones)
         run: |
           if [ -z "${{ env.folders }}" ]; then
             echo "No folders found."
@@ -41,6 +41,7 @@ jobs:
           # Generate folder list for HTML, but only for new folders
           NEW_FOLDER_LIST=""
           for folder in ${{ env.folders }}; do
+            # Cek apakah folder sudah ada di CURRENT_FOLDERS
             if [[ ! " ${CURRENT_FOLDERS} " =~ " ${folder} " ]]; then
               # Folder belum ada, tambahkan ke list baru
               NEW_FOLDER_LIST="$NEW_FOLDER_LIST<li><a href=\"$folder/\">${folder}</a></li>\n"
