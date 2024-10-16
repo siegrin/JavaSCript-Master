@@ -3,9 +3,9 @@ name: Update HTML with Folders
 on:
   push:
     paths:
-      - '**/*'
+      - '**/*'  # Memicu workflow saat ada perubahan di folder manapun
   schedule:
-    - cron: '*/1 * * * *' # Runs every minute
+    - cron: '*/1 * * * *'  # Opsional: Menjalankan setiap menit
 
 jobs:
   update-html:
@@ -21,7 +21,7 @@ jobs:
           FOLDERS=$(ls -d */ | grep -v '\.github\|node_modules')
           echo "folders=${FOLDERS}" >> $GITHUB_ENV
 
-      - name: Update index.html with folder list
+      - name: Check for changes and update index.html
         run: |
           if [ -z "${{ env.folders }}" ]; then
             echo "No folders found."
@@ -31,7 +31,6 @@ jobs:
           # Generate folder list for HTML
           FOLDER_LIST=""
           for folder in ${{ env.folders }}; do
-            # Use quotes around folder name to handle spaces
             FOLDER_LIST="$FOLDER_LIST<li><a href=\"$folder\">${folder%/}</a></li>\n"
           done
 
@@ -44,6 +43,7 @@ jobs:
             exit 0
           fi
 
+          # If changes exist, commit and push the update
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git add index.html
