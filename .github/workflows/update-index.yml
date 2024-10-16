@@ -56,18 +56,18 @@ jobs:
           # Cek folder yang ada di index.html tapi sudah tidak ada di repository, lalu hapus
           TEMP_INDEX_HTML=$(mktemp)
           while read -r folder; do
-            if [[ ! " ${folders} " =~ " ${folder} " ]]; then
-              echo "Removing folder $folder from index.html."
-            else
+            if [[ " ${folders} " =~ " ${folder} " ]]; then
               # Tetap tambahkan folder yang masih ada di repository ke file baru
               echo "<li><a href=\"$folder/\">${folder}</a></li>" >> "$TEMP_INDEX_HTML"
+            else
+              echo "Removing folder $folder from index.html."
             fi
           done < <(grep -oP '(?<=<a href=\").*?(?=\/\")' index.html)
 
-          # Gantikan list lama dengan list yang diperbarui di index.html
-          sed -i.bak '/<!-- FOLDER_LIST_PLACEHOLDER -->/r '"$TEMP_INDEX_HTML" index.html
+          # Gantikan placeholder dengan daftar folder yang diperbarui di index.html
+          sed -i.bak "/<!-- FOLDER_LIST_PLACEHOLDER -->/r $TEMP_INDEX_HTML" index.html
           
-          # Setelah menambah daftar folder yang ada, tambahkan folder baru di bawah placeholder
+          # Tambahkan folder baru yang belum ada
           if [ -n "$UPDATED_FOLDER_LIST" ]; then
             echo -e "$UPDATED_FOLDER_LIST" >> index.html
           fi
