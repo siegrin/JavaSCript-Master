@@ -21,23 +21,41 @@ jobs:
           FOLDERS=$(find . -maxdepth 1 -type d ! -name '.*' ! -name 'node_modules' ! -name '.github' | sed 's|./||')
           echo "FOLDERS=$FOLDERS" >> $GITHUB_ENV
 
-      - name: Check for changes and update index.html
+      - name: Read existing folders from index.html
+        id: read_index
         run: |
-          # Ambil daftar folder dari variabel lingkungan
+          # Ambil daftar folder yang sudah ada dari index.html
+          EXISTING_FOLDERS=$(grep -oP '(?<=<a href=")[^"]*' index.html)
+          echo "EXISTING_FOLDERS=$EXISTING_FOLDERS" >> $GITHUB_ENV
+
+      - name: Check for new folders and update index.html
+        run: |
+          # Ambil nilai dari variabel lingkungan
           FOLDERS="${{ env.FOLDERS }}"
+          EXISTING_FOLDERS="${{ env.EXISTING_FOLDERS }}"
 
           if [ -z "$FOLDERS" ]; then
             echo "No folders found."
             exit 0
           fi
-          
-          # Generate folder list for HTML
+
+          # Generate new folder list for HTML
           FOLDER_LIST=""
           IFS=$'\n'
           for folder in $FOLDERS; do
             folder_name="${folder##*/}"  # Ambil nama folder tanpa path
-            FOLDER_LIST="$FOLDER_LIST<li><a href=\"$folder\">$folder_name</a></li>\n"
+            # Cek apakah folder sudah ada
+            if ! echo "$EXISTING_FOLDERS" | grep -q "^$folder$"; then
+              # Jika folder baru, tambahkan ke daftar
+              FOLDER_LIST="$FOLDER_LIST<li><a href=\"$folder\">$folder_name</a></li>\n"
+            fi
           done
+
+          # Jika tidak ada folder baru, keluar
+          if [ -z "$FOLDER_LIST" ]; then
+            echo "No new folders to add."
+            exit 0
+          fi
 
           # Replace placeholder in HTML with folder list
           sed -i.bak "s|<!-- FOLDER_LIST_PLACEHOLDER -->|${FOLDER_LIST}|" index.html
@@ -52,5 +70,5 @@ jobs:
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git add index.html
-          git commit -m "Update index.html with project folders"
+          git commit -m "Add new project folders to index.html"
           git push
