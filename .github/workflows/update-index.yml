@@ -69,7 +69,8 @@ jobs:
           
           # Tambahkan folder baru yang belum ada
           if [ -n "$UPDATED_FOLDER_LIST" ]; then
-            echo -e "$UPDATED_FOLDER_LIST" >> index.html
+            # Hapus placeholder sebelum menambahkan folder baru
+            sed -i.bak "s/<!-- FOLDER_LIST_PLACEHOLDER -->/<!-- FOLDER_LIST_PLACEHOLDER -->\n$UPDATED_FOLDER_LIST/" index.html
           fi
 
           # Check if index.html has changed
