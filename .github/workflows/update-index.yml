@@ -5,7 +5,7 @@ on:
     paths:
       - '**/*'  # Memicu workflow saat ada perubahan di folder manapun
   schedule:
-    - cron: '*/1 * * * *'  # Opsional: Menjalankan setiap menit
+    - cron: '*/5 * * * *'  # Opsional: Menjalankan setiap 5 menit (jika ada perubahan otomatis setiap interval)
 
 jobs:
   update-html:
