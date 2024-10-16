@@ -19,11 +19,14 @@ jobs:
         id: get_folders
         run: |
           FOLDERS=$(find . -maxdepth 1 -type d ! -name '.*' ! -name 'node_modules' ! -name '.github' | sed 's|./||')
-          echo "folders=${FOLDERS}" >> $GITHUB_ENV
+          echo "FOLDERS=$FOLDERS" >> $GITHUB_ENV
 
       - name: Check for changes and update index.html
         run: |
-          if [ -z "${{ env.folders }}" ]; then
+          # Ambil daftar folder dari variabel lingkungan
+          FOLDERS="${{ env.FOLDERS }}"
+
+          if [ -z "$FOLDERS" ]; then
             echo "No folders found."
             exit 0
           fi
@@ -31,7 +34,7 @@ jobs:
           # Generate folder list for HTML
           FOLDER_LIST=""
           IFS=$'\n'
-          for folder in ${{ env.folders }}; do
+          for folder in $FOLDERS; do
             folder_name="${folder##*/}"  # Ambil nama folder tanpa path
             FOLDER_LIST="$FOLDER_LIST<li><a href=\"$folder\">$folder_name</a></li>\n"
           done
