@@ -67,8 +67,10 @@ jobs:
           # Gantikan list lama dengan list yang diperbarui di index.html
           sed -i.bak '/<!-- FOLDER_LIST_PLACEHOLDER -->/r '"$TEMP_INDEX_HTML" index.html
           
-          # Append folder baru yang belum ada
-          echo -e "$UPDATED_FOLDER_LIST" >> index.html
+          # Setelah menambah daftar folder yang ada, tambahkan folder baru di bawah placeholder
+          if [ -n "$UPDATED_FOLDER_LIST" ]; then
+            echo -e "$UPDATED_FOLDER_LIST" >> index.html
+          fi
 
           # Check if index.html has changed
           if git diff --quiet; then
