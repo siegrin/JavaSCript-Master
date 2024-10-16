@@ -3,7 +3,7 @@ name: Detect All Folders
 on:
   push:
     paths:
-      - '**/'  # Mendeteksi semua perubahan di dalam folder
+      - '**/'  # Mendeteksi perubahan di dalam folder
 
 jobs:
   update-html:
@@ -43,15 +43,13 @@ jobs:
 
       - name: Commit changes
         run: |
-          git config --local user.name "github-actions"  # Mengonfigurasi nama pengguna Git
-          git config --local user.email "github-actions@github.com"  # Mengonfigurasi email pengguna
-          
           # Memeriksa apakah ada perubahan untuk di-commit
           if ! git diff --quiet; then  # Memeriksa apakah ada perbedaan
             git add "$html_file"  # Menambahkan file HTML ke staging area
             git commit -m "Update folder list in index.html"  # Melakukan commit perubahan
+            git push  # Mengirimkan perubahan ke repository
           else
             echo "No changes to commit"  # Pesan jika tidak ada perubahan
           fi
-          
-          git push  # Mengirimkan perubahan ke repository
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Menggunakan token akses GitHub
