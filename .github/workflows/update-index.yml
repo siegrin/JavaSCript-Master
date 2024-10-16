@@ -48,7 +48,7 @@ jobs:
 
           # Tambahkan folder yang ada di repository tapi belum ada di index.html
           for folder in ${{ env.folders }}; do
-            if [[ ! " ${CURRENT_FOLDERS} " =~ " ${folder} " ]]; then
+            if [[ ! " ${current_folders} " =~ " ${folder} " ]]; then
               UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST<li><a href=\"$folder/\">${folder}</a></li>\n"
             fi
           done
@@ -56,7 +56,7 @@ jobs:
           # Cek folder yang ada di index.html tapi sudah tidak ada di repository, lalu hapus
           TEMP_INDEX_HTML=$(mktemp)
           while read -r folder; do
-            if [[ ! " ${env.folders} " =~ " ${folder} " ]]; then
+            if [[ ! " ${folders} " =~ " ${folder} " ]]; then
               echo "Removing folder $folder from index.html."
             else
               # Tetap tambahkan folder yang masih ada di repository ke file baru
