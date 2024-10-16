@@ -1,11 +1,8 @@
 name: Update HTML with Folders
 
 on:
-  push:
-    paths:
-      - '**/*'  # Memicu workflow saat ada perubahan di folder manapun
   schedule:
-    - cron: '*/1 * * * *'  # Opsional: Menjalankan setiap menit
+    - cron: '*/1 * * * *'  # Menjalankan setiap menit
 
 jobs:
   update-html:
@@ -19,18 +16,31 @@ jobs:
         id: get_folders
         run: |
           FOLDERS=$(find . -maxdepth 1 -type d ! -name '.*' ! -name 'node_modules' ! -name '.github' | sed 's|./||')
+          echo "$FOLDERS" > current_folders.txt  # Simpan daftar folder saat ini
           echo "FOLDERS=$FOLDERS" >> $GITHUB_ENV
+
+      - name: Compare with previous folders
+        id: compare_folders
+        run: |
+          if [ -f previous_folders.txt ]; then
+            PREVIOUS_FOLDERS=$(cat previous_folders.txt)
+            if [ "$PREVIOUS_FOLDERS" == "$(cat current_folders.txt)" ]; then
+              echo "No changes detected."
+              exit 0
+            fi
+          fi
+
+          # Simpan daftar folder saat ini sebagai daftar sebelumnya
+          cp current_folders.txt previous_folders.txt
 
       - name: Read existing folders from index.html
         id: read_index
         run: |
-          # Ambil daftar folder yang sudah ada dari index.html
           EXISTING_FOLDERS=$(grep -oP '(?<=<a href=")[^"]*' index.html)
           echo "EXISTING_FOLDERS=$EXISTING_FOLDERS" >> $GITHUB_ENV
 
       - name: Check for new folders and update index.html
         run: |
-          # Ambil nilai dari variabel lingkungan
           FOLDERS="${{ env.FOLDERS }}"
           EXISTING_FOLDERS="${{ env.EXISTING_FOLDERS }}"
 
@@ -39,34 +49,27 @@ jobs:
             exit 0
           fi
 
-          # Generate new folder list for HTML
           FOLDER_LIST=""
           IFS=$'\n'
           for folder in $FOLDERS; do
-            folder_name="${folder##*/}"  # Ambil nama folder tanpa path
-            # Cek apakah folder sudah ada
+            folder_name="${folder##*/}"
             if ! echo "$EXISTING_FOLDERS" | grep -q "^$folder$"; then
-              # Jika folder baru, tambahkan ke daftar
               FOLDER_LIST="$FOLDER_LIST<li><a href=\"$folder\">$folder_name</a></li>\n"
             fi
           done
 
-          # Jika tidak ada folder baru, keluar
           if [ -z "$FOLDER_LIST" ]; then
             echo "No new folders to add."
             exit 0
           fi
 
-          # Replace placeholder in HTML with folder list
           sed -i.bak "s|<!-- FOLDER_LIST_PLACEHOLDER -->|${FOLDER_LIST}|" index.html
 
-          # Check if index.html has changed
           if git diff --quiet; then
             echo "No changes to index.html. Skipping commit."
             exit 0
           fi
 
-          # If changes exist, commit and push the update
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git add index.html
