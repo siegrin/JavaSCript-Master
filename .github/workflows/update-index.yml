@@ -18,7 +18,8 @@ jobs:
       - name: Get all folders
         id: get_folders
         run: |
-          FOLDERS=$(ls -d */ | grep -v '\.github\|node_modules')
+          # Mendapatkan semua folder kecuali .github dan node_modules, lalu menghapus trailing slash
+          FOLDERS=$(ls -d */ | grep -v '\.github\|node_modules' | sed 's/\/$//')
           echo "folders=${FOLDERS}" >> $GITHUB_ENV
 
       - name: Check for changes and update index.html
@@ -31,7 +32,7 @@ jobs:
           # Generate folder list for HTML
           FOLDER_LIST=""
           for folder in ${{ env.folders }}; do
-            FOLDER_LIST="$FOLDER_LIST<li><a href=\"$folder\">${folder%/}</a></li>\n"
+            FOLDER_LIST="$FOLDER_LIST<li><a href=\"$folder/\">${folder}</a></li>\n"
           done
 
           # Replace placeholder in HTML with folder list
