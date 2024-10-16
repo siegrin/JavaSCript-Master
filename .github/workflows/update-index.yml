@@ -18,7 +18,7 @@ jobs:
       - name: Get all folders
         id: get_folders
         run: |
-          FOLDERS=$(find . -maxdepth 1 -type d ! -name '.*' ! -name 'node_modules' ! -name '.github')
+          FOLDERS=$(find . -maxdepth 1 -type d ! -name '.*' ! -name 'node_modules' ! -name '.github' | sed 's|./||')
           echo "folders=${FOLDERS}" >> $GITHUB_ENV
 
       - name: Check for changes and update index.html
@@ -30,11 +30,10 @@ jobs:
           
           # Generate folder list for HTML
           FOLDER_LIST=""
-          # Set Internal Field Separator to newline
           IFS=$'\n'
           for folder in ${{ env.folders }}; do
             folder_name="${folder##*/}"  # Ambil nama folder tanpa path
-            FOLDER_LIST="$FOLDER_LIST<li><a href=\"$folder_name\">$folder_name</a></li>\n"
+            FOLDER_LIST="$FOLDER_LIST<li><a href=\"$folder\">$folder_name</a></li>\n"
           done
 
           # Replace placeholder in HTML with folder list
