@@ -16,7 +16,7 @@ jobs:
       - name: Ambil semua folder
         id: get_folders
         run: |
-          # Mendapatkan semua folder kecuali .github dan node_modules, lalu menghapus trailing slash
+          # Mendapatkan semua folder kecuali .github dan node_modules
           FOLDERS=$(ls -d */ | grep -v '\.github\|node_modules' | sed 's/\/$//')
           echo "folders=$(echo "$FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
 
@@ -43,7 +43,7 @@ jobs:
           UPDATED_FOLDER_LIST=""
           declare -A existing_folders  # Menggunakan associative array untuk menyimpan folder tanpa duplikasi
 
-          # Tambahkan folder yang ada di repositori
+          # Tambahkan folder yang ada di repositori ke associative array
           for folder in ${{ env.folders }}; do
             folder_clean=$(echo "$folder" | tr '[:upper:]' '[:lower:]' | sed 's/^[ \t]*//;s/[ \t]*$//')  # Normalisasi nama folder
             
