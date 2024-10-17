@@ -60,4 +60,5 @@ jobs:
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git add $OUTPUT_README
-          git commit -m "
+          git commit -m "Reset dan sinkronkan daftar folder di README.md dengan repositori"
+          git push
