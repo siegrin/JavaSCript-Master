@@ -1,0 +1,94 @@
+name: Perbarui HTML dan README
+
+on:
+  push:
+    paths:
+      - '**/*'  # Memicu workflow saat ada perubahan di folder manapun
+
+jobs:
+  update-files:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repositori
+        uses: actions/checkout@v2
+
+      - name: Ambil semua folder
+        id: get_folders
+        run: |
+          FOLDERS=$(ls -d */ | grep -v '\.github\|node_modules' | sed 's/\/$//')
+          echo "folders=$(echo "$FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
+
+      - name: Cek folder saat ini di index.html
+        id: read_html
+        run: |
+          if grep -q '<a href="' index.html; then
+            CURRENT_FOLDERS=$(grep -ioP '(?<=<a href=\").*?(?=\/\")' index.html | tr '[:upper:]' '[:lower:]' | sort -u)
+          else
+            CURRENT_FOLDERS=""
+          fi
+          echo "current_folders=$(echo "$CURRENT_FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
+
+      - name: Reset dan sinkronkan folder di index.html
+        run: |
+          if [ -z "${{ env.folders }}" ]; then
+            echo "Tidak ada folder yang ditemukan di repositori."
+            exit 0
+          fi
+
+          TEMPLATE_FILE="template.html"
+          OUTPUT_FILE="index.html"
+
+          > $OUTPUT_FILE
+          cp $TEMPLATE_FILE $OUTPUT_FILE
+
+          UPDATED_FOLDER_LIST=""
+          for folder in ${{ env.folders }}; do
+            folder_clean=$(echo "$folder" | tr '[:upper:]' '[:lower:]' | sed 's/^[ \t]*//;s/[ \t]*$//')
+            UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST<li><a href=\"$folder_clean/\">$folder</a></li>\n"
+          done
+
+          sed -i.bak "s|<!-- FOLDER_LIST_PLACEHOLDER -->|$UPDATED_FOLDER_LIST|" $OUTPUT_FILE
+
+          if git diff --quiet; then
+            echo "Tidak ada perubahan pada index.html. Melewatkan commit."
+            exit 0
+          fi
+
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add $OUTPUT_FILE
+          git commit -m "Reset dan sinkronkan folder di index.html dengan repositori"
+
+      - name: Reset dan sinkronkan folder di README.md
+        run: |
+          if [ -z "${{ env.folders }}" ]; then
+            echo "Tidak ada folder yang ditemukan di repositori."
+            exit 0
+          fi
+
+          TEMPLATE_FILE="template.md"
+          OUTPUT_FILE="README.md"
+
+          > $OUTPUT_FILE
+          cp $TEMPLATE_FILE $OUTPUT_FILE
+
+          UPDATED_FOLDER_LIST=""
+          for folder in ${{ env.folders }}; do
+            folder_clean=$(echo "$folder" | tr '[:upper:]' '[:lower:]' | sed 's/^[ \t]*//;s/[ \t]*$//')
+            UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST- [$folder](./$folder_clean/)\n"
+          done
+
+          sed -i.bak "s|<!-- FOLDER_LIST_PLACEHOLDER -->|$UPDATED_FOLDER_LIST|" $OUTPUT_FILE
+
+          if git diff --quiet; then
+            echo "Tidak ada perubahan pada README.md. Melewatkan commit."
+            exit 0
+          fi
+
+          git add $OUTPUT_FILE
+          git commit -m "Reset dan sinkronkan folder di README.md dengan repositori"
+          
+      - name: Push perubahan
+        run: |
+          git push
