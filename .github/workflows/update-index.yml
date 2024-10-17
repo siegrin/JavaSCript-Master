@@ -66,10 +66,11 @@ jobs:
           # Hapus semua instance dari placeholder sebelum menambahkan yang baru
           sed -i.bak "/<!-- FOLDER_LIST_PLACEHOLDER -->/d" index.html
 
-          # Gabungkan konten dan tambahkan ke index.html
+          # Tambahkan folder baru yang belum ada dan placeholder
           if [ -n "$UPDATED_FOLDER_LIST" ]; then
             echo -e "$UPDATED_FOLDER_LIST\n<!-- FOLDER_LIST_PLACEHOLDER -->" >> index.html
           else
+            # Jika tidak ada folder baru, tambahkan placeholder saja
             echo "<!-- FOLDER_LIST_PLACEHOLDER -->" >> index.html
           fi
 
