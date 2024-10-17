@@ -25,7 +25,7 @@ jobs:
         run: |
           # Ambil semua folder yang sudah ada di index.html secara case-insensitive
           if grep -q '<a href="' index.html; then
-            CURRENT_FOLDERS=$(grep -ioP '(?<=<a href=\").*?(?=\/\")' index.html | tr '[:upper:]' '[:lower:]' | sort -u | sed 's/^[ \t]*//;s/[ \t]*$//')
+            CURRENT_FOLDERS=$(grep -ioP '(?<=<a href=\").*?(?=\/\")' index.html | tr '[:upper:]' '[:lower:]' | sort -u)
           else
             CURRENT_FOLDERS=""
           fi
@@ -63,6 +63,10 @@ jobs:
               echo "Menghapus folder $folder dari index.html." >> /dev/stderr
             fi
           done < <(grep -ioP '(?<=<a href=\").*?(?=\/\")' index.html)
+
+          # Hapus semua isi di index.html sebelum menambahkan yang baru
+          > index.html
+          echo "<!-- FOLDER_LIST_PLACEHOLDER -->" >> index.html  # Menambahkan placeholder
 
           # Gantikan placeholder dengan daftar folder yang diperbarui di index.html
           sed -i.bak "/<!-- FOLDER_LIST_PLACEHOLDER -->/r $TEMP_INDEX_HTML" index.html
