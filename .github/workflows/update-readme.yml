@@ -1,5 +1,6 @@
 name: Perbarui README.md dengan Daftar Folder
 
+# Menjalankan workflow setiap kali ada perubahan di repositori
 on:
   push:
     paths:
@@ -10,9 +11,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout repositori
       - name: Checkout repositori
         uses: actions/checkout@v2
 
+      # 2. Ambil daftar folder yang ada di repositori
       - name: Ambil semua folder
         id: get_folders
         run: |
@@ -20,43 +23,46 @@ jobs:
           FOLDERS=$(ls -d */ | grep -v '\.github\|node_modules' | sed 's/\/$//')
           echo "folders=$(echo "$FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
 
+      # 3. Perbarui README.md dengan daftar folder yang ditemukan
       - name: Perbarui README.md
         run: |
-          # Jika tidak ada folder dalam repositori, keluar
+          # Jika tidak ada folder dalam repositori, keluar dari proses
           if [ -z "${{ env.folders }}" ]; then
             echo "Tidak ada folder yang ditemukan di repositori."
             exit 0
           fi
 
-          # Baca template dari template.md
+          # Baca template dari file template.md
           TEMPLATE_FILE="template.md"
           README_FILE="README.md"
 
-          # Hapus isi file README.md
+          # Hapus isi file README.md lama
           > $README_FILE
 
           # Salin konten template ke file README.md
           cp $TEMPLATE_FILE $README_FILE
 
-          # Generate daftar folder untuk Markdown dalam bentuk tabel dengan icon
+          # Generate daftar folder untuk ditampilkan dalam format tabel dengan icon
           UPDATED_FOLDER_LIST=""
           ICON="📁"  # Icon untuk folder
           for folder in ${{ env.folders }}; do
             # Escape karakter spesial di folder name sebelum memasukkan ke sed
             folder_escaped=$(echo "$folder" | sed 's/[\/&]/\\&/g')
-            UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST| $ICON | [$folder_escaped]($folder_escaped/) |\n"
+
+            # Menambahkan folder ke daftar dalam format tabel dengan icon
+            UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST| $ICON | [$folder]($folder_escaped/) |\n"
           done
 
-          # Gantikan placeholder dengan daftar folder yang diperbarui di README.md
+          # Gunakan `sed` untuk menggantikan placeholder dengan daftar folder yang diperbarui di README.md
           sed -i.bak "s|<!-- FOLDER_LIST_PLACEHOLDER -->|$UPDATED_FOLDER_LIST|" $README_FILE
 
-          # Periksa jika tidak ada perubahan pada README.md
+          # Cek jika tidak ada perubahan pada README.md
           if git diff --quiet; then
             echo "Tidak ada perubahan pada README.md. Melewatkan commit."
             exit 0
           fi
 
-          # Commit dan push perubahan
+          # Jika ada perubahan, commit dan push ke repositori
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git add $README_FILE
