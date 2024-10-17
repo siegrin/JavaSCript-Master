@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - '**/*'  # Memicu workflow saat ada perubahan di folder manapun
+      - 'mini-project/**/*'  # Memicu workflow saat ada perubahan di dalam folder mini-project
 
 jobs:
   update-html:
