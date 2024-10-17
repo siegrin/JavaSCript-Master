@@ -39,27 +39,27 @@ jobs:
             exit 0
           fi
 
-          # Template baru untuk index.html
-          echo '<!DOCTYPE html>' > index.html
-          echo '<html lang="en">' >> index.html
-          echo '  <head>' >> index.html
-          echo '    <meta charset="UTF-8">' >> index.html
-          echo '    <meta name="viewport" content="width=device-width, initial-scale=1.0">' >> index.html
-          echo '    <title>Project Folder List</title>' >> index.html
-          echo '  </head>' >> index.html
-          echo '  <body>' >> index.html
-          echo '    <h1>Project Folders</h1>' >> index.html
-          echo '    <ul>' >> index.html
+          # Baca template dari template.html
+          TEMPLATE_FILE="template.html"
+          OUTPUT_FILE="index.html"
 
-          # Tambahkan folder yang ada ke index.html
+          # Hapus isi file index.html
+          > $OUTPUT_FILE
+
+          # Salin konten template ke file index.html
+          cp $TEMPLATE_FILE $OUTPUT_FILE
+
+          # Generate daftar folder untuk HTML
+          UPDATED_FOLDER_LIST=""
+
+          # Tambahkan folder yang ada ke list
           for folder in ${{ env.folders }}; do
             folder_clean=$(echo "$folder" | tr '[:upper:]' '[:lower:]' | sed 's/^[ \t]*//;s/[ \t]*$//')  # Normalisasi nama folder
-            echo "      <li><a href=\"$folder_clean/\">$folder</a></li>" >> index.html
+            UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST<li><a href=\"$folder_clean/\">$folder</a></li>\n"
           done
 
-          echo '    </ul>' >> index.html
-          echo '  </body>' >> index.html
-          echo '</html>' >> index.html
+          # Gantikan placeholder dengan daftar folder yang diperbarui di index.html
+          sed -i.bak "s|<!-- FOLDER_LIST_PLACEHOLDER -->|$UPDATED_FOLDER_LIST|" $OUTPUT_FILE
 
           # Cek jika tidak ada perubahan pada index.html
           if git diff --quiet; then
@@ -70,6 +70,6 @@ jobs:
           # Commit dan push perubahan
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-          git add index.html
+          git add $OUTPUT_FILE
           git commit -m "Reset dan sinkronkan folder di index.html dengan repositori"
           git push
