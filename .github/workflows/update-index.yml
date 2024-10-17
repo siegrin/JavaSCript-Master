@@ -31,7 +31,7 @@ jobs:
           fi
           echo "current_folders=$(echo "$CURRENT_FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
 
-      - name: Sinkronkan folder di index.html
+      - name: Reset dan sinkronkan folder di index.html
         run: |
           # Jika tidak ada folder dalam repositori, keluar
           if [ -z "${{ env.folders }}" ]; then
@@ -39,50 +39,27 @@ jobs:
             exit 0
           fi
 
-          # Hasilkan daftar folder yang diperbarui untuk HTML
-          UPDATED_FOLDER_LIST=""
-          declare -A existing_folders  # Menggunakan associative array untuk menyimpan folder tanpa duplikasi
+          # Template baru untuk index.html
+          echo '<!DOCTYPE html>' > index.html
+          echo '<html lang="en">' >> index.html
+          echo '  <head>' >> index.html
+          echo '    <meta charset="UTF-8">' >> index.html
+          echo '    <meta name="viewport" content="width=device-width, initial-scale=1.0">' >> index.html
+          echo '    <title>Project Folder List</title>' >> index.html
+          echo '  </head>' >> index.html
+          echo '  <body>' >> index.html
+          echo '    <h1>Project Folders</h1>' >> index.html
+          echo '    <ul>' >> index.html
 
-          # Tambahkan folder yang ada di repositori ke associative array
+          # Tambahkan folder yang ada ke index.html
           for folder in ${{ env.folders }}; do
             folder_clean=$(echo "$folder" | tr '[:upper:]' '[:lower:]' | sed 's/^[ \t]*//;s/[ \t]*$//')  # Normalisasi nama folder
-            
-            # Simpan folder yang bersih ke dalam associative array
-            existing_folders["$folder_clean"]=1
+            echo "      <li><a href=\"$folder_clean/\">$folder</a></li>" >> index.html
           done
 
-          # Hapus folder yang tidak ada di repositori dari index.html
-          TEMP_INDEX_HTML=$(mktemp)
-
-          # Loop untuk mengecek dan hanya menyimpan folder yang masih ada
-          while read -r folder; do
-            folder_clean=$(echo "$folder" | tr '[:upper:]' '[:lower:]' | sed 's/^[ \t]*//;s/[ \t]*$//')  # Normalisasi nama folder
-            if [[ -n "${existing_folders[$folder_clean]}" ]]; then
-              echo "<li><a href=\"$folder/\">${folder}</a></li>" >> "$TEMP_INDEX_HTML"
-            else
-              echo "Menghapus folder $folder dari index.html." >> /dev/stderr
-            fi
-          done < <(grep -ioP '(?<=<a href=\").*?(?=\/\")' index.html)
-
-          # Hapus semua isi di index.html sebelum menambahkan yang baru
-          > index.html
-          echo "<!-- FOLDER_LIST_PLACEHOLDER -->" >> index.html  # Menambahkan placeholder
-
-          # Gantikan placeholder dengan daftar folder yang diperbarui di index.html
-          sed -i.bak "/<!-- FOLDER_LIST_PLACEHOLDER -->/r $TEMP_INDEX_HTML" index.html
-
-          # Tambahkan folder baru yang belum ada
-          for folder in "${!existing_folders[@]}"; do
-            if ! echo "${{ env.current_folders }}" | grep -q -i "^$folder$"; then
-              UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST<li><a href=\"$folder/\">${folder}</a></li>\n"
-            fi
-          done
-
-          # Jika ada folder baru, tambahkan ke index.html
-          if [ -n "$UPDATED_FOLDER_LIST" ]; then
-            # Tambahkan daftar folder yang baru di atas placeholder
-            sed -i.bak "s|<!-- FOLDER_LIST_PLACEHOLDER -->|<!-- FOLDER_LIST_PLACEHOLDER -->\n$UPDATED_FOLDER_LIST|" index.html
-          fi
+          echo '    </ul>' >> index.html
+          echo '  </body>' >> index.html
+          echo '</html>' >> index.html
 
           # Cek jika tidak ada perubahan pada index.html
           if git diff --quiet; then
@@ -94,5 +71,5 @@ jobs:
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git add index.html
-          git commit -m "Sinkronkan folder di index.html dengan repositori"
+          git commit -m "Reset dan sinkronkan folder di index.html dengan repositori"
           git push
