@@ -23,59 +23,34 @@ jobs:
       - name: Check current folders in README.md
         id: read_readme
         run: |
-          # Ambil semua folder yang sudah ada di README.md, case-insensitive
-          if grep -q '<a href="' README.md; then
-            CURRENT_FOLDERS=$(grep -ioP '(?<=<a href=\").*?(?=\/\")' README.md)
-          else
-            CURRENT_FOLDERS=""
-          fi
+          # Ambil semua folder yang sudah ada di README.md
+          CURRENT_FOLDERS=$(grep -ioP '(?<=<a href=\").*?(?=\/\")' README.md || echo "")
           echo "current_folders=$(echo "$CURRENT_FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
 
       - name: Sync folders in README.md
         run: |
-          # Jika tidak ada folder dalam repository, keluar
-          if [ -z "${{ env.folders }}" ]; then
-            echo "No folders found in the repository."
-            exit 0
-          fi
+          # Generate folder list untuk ditambahkan ke README.md
+          FOLDER_LIST=""
 
-          # Generate updated folder list for README.md
-          UPDATED_FOLDER_LIST=""
-
-          # Tambahkan folder yang ada di repository tapi belum ada di README.md (case-insensitive)
           for folder in ${{ env.folders }}; do
-            if [[ ! " ${current_folders,,} " =~ " ${folder,,} " ]]; then
-              UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST<li><a href=\"$folder/\">${folder}</a></li>\n"
+            if [[ ! " ${current_folders} " =~ " ${folder} " ]]; then
+              FOLDER_LIST="$FOLDER_LIST| [$folder](./$folder) |\n"
             fi
           done
 
-          # Cek folder yang ada di README.md tapi sudah tidak ada di repository, lalu hapus
-          TEMP_README=$(mktemp)
-          while read -r folder; do
-            if [[ " ${folders,,} " =~ " ${folder,,} " ]]; then
-              echo "<li><a href=\"$folder/\">${folder}</a></li>" >> "$TEMP_README"
-            else
-              echo "Removing folder $folder from README.md."
-            fi
-          done < <(grep -ioP '(?<=<a href=\").*?(?=\/\")' README.md)
-
-          # Gantikan placeholder dengan daftar folder yang diperbarui di README.md
-          sed -i.bak "/<!-- FOLDER_LIST_PLACEHOLDER -->/r $TEMP_README" README.md
-          
-          # Tambahkan folder baru yang belum ada, jika ada
-          if [ -n "$UPDATED_FOLDER_LIST" ]; then
-            sed -i.bak "s|<!-- FOLDER_LIST_PLACEHOLDER -->|<!-- FOLDER_LIST_PLACEHOLDER -->\n$UPDATED_FOLDER_LIST|" README.md
-          fi
-
-          # Cek jika tidak ada perubahan pada README.md
-          if git diff --quiet; then
-            echo "No changes to README.md. Skipping commit."
+          # Cek perubahan pada README.md
+          if [ -n "$FOLDER_LIST" ]; then
+            sed -i 's|<!-- FOLDER_LIST_PLACEHOLDER -->|'"$FOLDER_LIST"'|g' README.md
+          else
+            echo "No new folders to add."
             exit 0
           fi
 
-          # Commit dan push perubahan
+      - name: Commit changes
+        run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
+          git pull --rebase
           git add README.md
-          git commit -m "Sync folders in README.md with repository"
+          git commit -m "Update README.md with new folders"
           git push
