@@ -7,7 +7,6 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    transition: background-color .1s ease;
 }
 
 .container {
