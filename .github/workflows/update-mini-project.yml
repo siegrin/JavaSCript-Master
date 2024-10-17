@@ -13,19 +13,19 @@ jobs:
       - name: Checkout repositori
         uses: actions/checkout@v2
 
-      - name: Ambil semua folder
+      - name: Ambil semua folder di mini-project
         id: get_folders
         run: |
-          # Mendapatkan semua folder kecuali .github dan node_modules
-          FOLDERS=$(ls -d */ | grep -v '\.github\|node_modules' | sed 's/\/$//')
+          # Mendapatkan semua folder di dalam mini-project
+          FOLDERS=$(ls -d mini-project/*/ | sed 's/mini-project\///;s/\/$//')
           echo "folders=$(echo "$FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
 
       - name: Cek folder saat ini di index.html
         id: read_html
         run: |
           # Ambil semua folder yang sudah ada di index.html secara case-insensitive
-          if grep -q '<a href="' index.html; then
-            CURRENT_FOLDERS=$(grep -ioP '(?<=<a href=\").*?(?=\/\")' index.html | tr '[:upper:]' '[:lower:]' | sort -u)
+          if grep -q '<a href="' mini-project/index.html; then
+            CURRENT_FOLDERS=$(grep -ioP '(?<=<a href=\").*?(?=\/\")' mini-project/index.html | tr '[:upper:]' '[:lower:]' | sort -u)
           else
             CURRENT_FOLDERS=""
           fi
