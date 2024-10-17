@@ -81,4 +81,8 @@ jobs:
           git config --global user.email "github-actions@github.com"
           git add index.html
           git commit -m "Sync folders in index.html with repository"
+<<<<<<< HEAD
           git push
+=======
+          git push
+>>>>>>> 7184a9dec55d48d34aaed1eac6d5fa1c1da0a2cc
