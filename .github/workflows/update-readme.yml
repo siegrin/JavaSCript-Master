@@ -24,8 +24,8 @@ jobs:
         id: read_readme
         run: |
           # Ambil semua folder yang sudah ada di README.md secara case-insensitive
-          if grep -q '\|.*\|.*\|.*\|' README.md; then
-            CURRENT_FOLDERS=$(grep -oP '\|.*\|.*\|.*\|.*\|' README.md | tr '[:upper:]' '[:lower:]' | sort -u)
+          if grep -q '\[.*\]\(.*\)' README.md; then
+            CURRENT_FOLDERS=$(grep -oP '\[(.*?)\]\(\K.*?(?=\)' README.md | tr '[:upper:]' '[:lower:]' | sort -u)
           else
             CURRENT_FOLDERS=""
           fi
@@ -52,12 +52,10 @@ jobs:
           # Generate daftar folder untuk Markdown
           UPDATED_FOLDER_LIST=""
 
-          # Tambahkan folder yang ada ke list dalam bentuk tabel
-          UPDATED_FOLDER_LIST="| Folder | Deskripsi |\n|--------|-----------|\n"
+          # Tambahkan folder yang ada ke list
           for folder in ${{ env.folders }}; do
             folder_clean=$(echo "$folder" | tr '[:upper:]' '[:lower:]' | sed 's/^[ \t]*//;s/[ \t]*$//')  # Normalisasi nama folder
-            # Gantikan 'Deskripsi' dengan deskripsi yang sesuai jika ada
-            UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST| [$folder](./$folder) | Deskripsi untuk $folder |\n"
+            UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST- [$folder](./$folder)\n"
           done
 
           # Gantikan placeholder dengan daftar folder yang diperbarui di README.md
