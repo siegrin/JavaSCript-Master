@@ -1,25 +1,3 @@
-name: Perbarui README dengan Daftar Folder dan Ikon
-
-on:
-  push:
-    paths:
-      - '**/*'  # Memicu workflow saat ada perubahan di folder manapun
-
-jobs:
-  update-readme:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repositori
-        uses: actions/checkout@v2
-
-      - name: Ambil semua folder
-        id: get_folders
-        run: |
-          # Mendapatkan semua folder kecuali .github dan node_modules
-          FOLDERS=$(ls -d */ | grep -v '\.github\|node_modules' | sed 's/\/$//')
-          echo "folders=$(echo "$FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
-
       - name: Reset dan perbarui README.md
         run: |
           README_FILE="README.md"
@@ -39,6 +17,7 @@ jobs:
           done
 
           # Gantikan placeholder dengan daftar folder yang diperbarui di README.md
+          # Ganti karakter pemisah dari / ke | untuk menghindari masalah escaping
           sed -i.bak "s|<!-- FOLDER_LIST_PLACEHOLDER -->|$UPDATED_FOLDER_LIST|" $README_FILE
 
           # Cek jika tidak ada perubahan pada README.md
