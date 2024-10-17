@@ -42,10 +42,13 @@ jobs:
           # Generate updated folder list for README
           UPDATED_FOLDER_LIST=""
 
+          # Tambahkan header tabel
+          UPDATED_FOLDER_LIST="| Folder | Description |\n|--------|-------------|\n"
+
           # Tambahkan folder yang ada di repository tapi belum ada di README.md
           for folder in ${{ env.folders }}; do
             if [[ ! " ${current_folders} " =~ " ${folder} " ]]; then
-              UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST| [$folder](./$folder) |\n"
+              UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST| :file_folder: [$folder](./$folder) | Description for $folder |\n"
             fi
           done
 
@@ -54,7 +57,7 @@ jobs:
           while read -r folder; do
             # Cek jika folder tersebut ada di dalam repository
             if [[ " ${{ env.folders }} " =~ " ${folder} " ]]; then
-              echo "| [$folder](./$folder) |" >> "$TEMP_README"
+              echo "| :file_folder: [$folder](./$folder) | Description for $folder |" >> "$TEMP_README"
             else
               echo "Removing folder $folder from README.md."
             fi
