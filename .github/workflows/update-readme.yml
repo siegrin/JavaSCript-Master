@@ -1,36 +1,3 @@
-      - name: Reset dan sinkronkan folder di index.html
-        run: |
-          if [ -z "${{ env.folders }}" ]; then
-            echo "Tidak ada folder yang ditemukan di repositori."
-            exit 0
-          fi
-
-          TEMPLATE_FILE="template.html"
-          OUTPUT_FILE="index.html"
-
-          > $OUTPUT_FILE
-          cp $TEMPLATE_FILE $OUTPUT_FILE
-
-          UPDATED_FOLDER_LIST=""
-          for folder in ${{ env.folders }}; do
-            folder_clean=$(echo "$folder" | tr '[:upper:]' '[:lower:]' | sed 's/^[ \t]*//;s/[ \t]*$//')
-            UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST<li><a href=\"$folder_clean/\">$folder</a></li>\n"
-          done
-
-          sed -i.bak "s|<!-- FOLDER_LIST_PLACEHOLDER -->|$UPDATED_FOLDER_LIST|" $OUTPUT_FILE
-
-          if git diff --quiet; then
-            echo "Tidak ada perubahan pada index.html. Melewatkan commit."
-            exit 0
-          fi
-
-          # Pengaturan nama dan email Git
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-
-          git add $OUTPUT_FILE
-          git commit -m "Reset dan sinkronkan folder di index.html dengan repositori"
-
       - name: Reset dan sinkronkan folder di README.md
         run: |
           if [ -z "${{ env.folders }}" ]; then
@@ -50,6 +17,9 @@
             UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST- [$folder](./$folder_clean/)\n"
           done
 
+          # Debug output untuk melihat isi daftar folder yang diperbarui
+          echo "Updated Folder List: $UPDATED_FOLDER_LIST"
+
           sed -i.bak "s|<!-- FOLDER_LIST_PLACEHOLDER -->|$UPDATED_FOLDER_LIST|" $OUTPUT_FILE
 
           if git diff --quiet; then
@@ -57,7 +27,6 @@
             exit 0
           fi
 
-          # Pengaturan nama dan email Git
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
 
