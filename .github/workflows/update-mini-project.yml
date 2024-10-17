@@ -13,14 +13,14 @@ jobs:
       - name: Checkout repositori
         uses: actions/checkout@v2
 
-      - name: Ambil semua folder dari mini-project
+      - name: Ambil semua folder
         id: get_folders
         run: |
-          # Mendapatkan semua folder di dalam direktori mini-project
+          # Mengambil semua folder hanya dari direktori mini-project
           FOLDERS=$(find mini-project -mindepth 1 -maxdepth 1 -type d | sed 's|^mini-project/||')
           echo "folders=$(echo "$FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
 
-      - name: Cek folder saat ini di mini-project/index.html
+      - name: Cek folder saat ini di index.html
         id: read_html
         run: |
           # Ambil semua folder yang sudah ada di mini-project/index.html secara case-insensitive
@@ -31,7 +31,7 @@ jobs:
           fi
           echo "current_folders=$(echo "$CURRENT_FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
 
-      - name: Reset dan sinkronkan folder di mini-project/index.html
+      - name: Reset dan sinkronkan folder di index.html
         run: |
           # Jika tidak ada folder dalam repositori, keluar
           if [ -z "${{ env.folders }}" ]; then
