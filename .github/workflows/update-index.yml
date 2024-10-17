@@ -1,4 +1,4 @@
-name: Update HTML with Folders
+name: Perbarui HTML dengan Folder
 
 on:
   push:
@@ -10,17 +10,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repositori
         uses: actions/checkout@v2
 
-      - name: Get all folders
+      - name: Ambil semua folder
         id: get_folders
         run: |
           # Mendapatkan semua folder kecuali .github dan node_modules, lalu menghapus trailing slash
           FOLDERS=$(ls -d */ | grep -v '\.github\|node_modules' | sed 's/\/$//')
           echo "folders=$(echo "$FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
 
-      - name: Check current folders in index.html
+      - name: Cek folder saat ini di index.html
         id: read_html
         run: |
           # Ambil semua folder yang sudah ada di index.html secara case-insensitive
@@ -31,18 +31,18 @@ jobs:
           fi
           echo "current_folders=$(echo "$CURRENT_FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
 
-      - name: Sync folders in index.html
+      - name: Sinkronkan folder di index.html
         run: |
-          # Jika tidak ada folder dalam repository, keluar
+          # Jika tidak ada folder dalam repositori, keluar
           if [ -z "${{ env.folders }}" ]; then
-            echo "No folders found in the repository."
+            echo "Tidak ada folder yang ditemukan di repositori."
             exit 0
           fi
 
-          # Generate updated folder list for HTML
+          # Hasilkan daftar folder yang diperbarui untuk HTML
           UPDATED_FOLDER_LIST=""
 
-          # Tambahkan folder yang ada di repository tapi belum ada di index.html (case-insensitive)
+          # Tambahkan folder yang ada di repositori tapi belum ada di index.html (case-insensitive)
           for folder in ${{ env.folders }}; do
             folder_lower=$(echo "$folder" | tr '[:upper:]' '[:lower:]')
             if [[ ! " ${current_folders} " =~ " ${folder_lower} " ]]; then
@@ -50,7 +50,7 @@ jobs:
             fi
           done
 
-          # Hapus folder yang tidak ada di repository dari index.html
+          # Hapus folder yang tidak ada di repositori dari index.html
           TEMP_INDEX_HTML=$(mktemp)
 
           # Loop untuk mengecek dan hanya menyimpan folder yang masih ada
@@ -73,7 +73,7 @@ jobs:
 
           # Cek jika tidak ada perubahan pada index.html
           if git diff --quiet; then
-            echo "No changes to index.html. Skipping commit."
+            echo "Tidak ada perubahan pada index.html. Melewatkan commit."
             exit 0
           fi
 
@@ -81,5 +81,5 @@ jobs:
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git add index.html
-          git commit -m "Sync folders in index.html with repository"
+          git commit -m "Sinkronkan folder di index.html dengan repositori"
           git push
