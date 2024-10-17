@@ -23,7 +23,7 @@ jobs:
       - name: Check current folders in index.html
         id: read_html
         run: |
-          # Ambil semua folder yang sudah ada di index.html secara case-insensitive
+          # Ambil semua folder yang sudah ada di index.html, case-insensitive
           if grep -q '<a href="' index.html; then
             CURRENT_FOLDERS=$(grep -ioP '(?<=<a href=\").*?(?=\/\")' index.html | tr '[:upper:]' '[:lower:]')
           else
@@ -38,13 +38,6 @@ jobs:
             echo "No folders found in the repository."
             exit 0
           fi
-
-          # Ambil daftar folder dari repository dan ubah menjadi lowercase untuk perbandingan case-insensitive
-          FOLDER_LIST=""
-          for folder in ${{ env.folders }}; do
-            folder_lower=$(echo "$folder" | tr '[:upper:]' '[:lower:]')
-            FOLDER_LIST="$FOLDER_LIST $folder_lower"
-          done
 
           # Generate updated folder list for HTML
           UPDATED_FOLDER_LIST=""
@@ -63,21 +56,22 @@ jobs:
           # Baca folder dari index.html dan hapus yang tidak ada di repository
           while read -r folder; do
             folder_lower=$(echo "$folder" | tr '[:upper:]' '[:lower:]')
-            if [[ " $FOLDER_LIST " =~ " ${folder_lower} " ]]; then
+            if [[ " ${{ env.folders }} " =~ " ${folder_lower} " ]]; then
               echo "<li><a href=\"$folder/\">${folder}</a></li>" >> "$TEMP_INDEX_HTML"
             else
               echo "Menghapus folder $folder dari index.html."
             fi
           done < <(grep -ioP '(?<=<a href=\").*?(?=\/\")' index.html)
 
-          # Gantikan placeholder dengan satu yang baru
-          if [ -n "$UPDATED_FOLDER_LIST" ]; then
-            sed -i.bak "/<!-- FOLDER_LIST_PLACEHOLDER -->/d" index.html  # Hapus semua placeholder
-            sed -i.bak "/<!-- FOLDER_LIST_PLACEHOLDER -->/i $UPDATED_FOLDER_LIST" index.html
-          fi
+          # Hapus semua instance dari placeholder sebelum menambahkan yang baru
+          sed -i.bak "/<!-- FOLDER_LIST_PLACEHOLDER -->/d" index.html
 
-          # Pastikan placeholder tetap berada di posisi yang tepat dan hanya satu
-          sed -i.bak -e '/<!-- FOLDER_LIST_PLACEHOLDER -->/!b;n;c <!-- FOLDER_LIST_PLACEHOLDER -->' index.html
+          # Gabungkan konten dan tambahkan ke index.html
+          if [ -n "$UPDATED_FOLDER_LIST" ]; then
+            echo -e "$UPDATED_FOLDER_LIST\n<!-- FOLDER_LIST_PLACEHOLDER -->" >> index.html
+          else
+            echo "<!-- FOLDER_LIST_PLACEHOLDER -->" >> index.html
+          fi
 
           # Cek jika tidak ada perubahan pada index.html
           if git diff --quiet; then
