@@ -3,7 +3,7 @@ name: Perbarui HTML dengan Folder
 on:
   push:
     paths:
-      - 'mini-projects/**/*'  # Memicu workflow saat ada perubahan di dalam folder mini-projects
+      - '**/*'  # Memicu workflow saat ada perubahan di folder manapun
 
 jobs:
   update-html:
@@ -16,9 +16,12 @@ jobs:
       - name: Ambil semua folder
         id: get_folders
         run: |
-          # Mendapatkan semua folder di dalam folder mini-projects
-          FOLDERS=$(find mini-projects -mindepth 1 -maxdepth 1 -type d | sed 's|^mini-projects/||')
-          echo "folders=$(echo "$FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
+          # Mendapatkan semua folder kecuali .github dan node_modules
+          # Sertakan folder dari direktori mini-projects
+          FOLDERS=$(find . -type d -not -path "./.github/*" -not -path "./node_modules/*" -not -path "." -not -path "./mini-projects/*" | sed 's|^\./||')
+          MINI_PROJECTS_FOLDERS=$(find mini-projects/* -type d -not -path "mini-projects/*/.*" | sed 's|^\./||')
+          ALL_FOLDERS="$FOLDERS $MINI_PROJECTS_FOLDERS"
+          echo "folders=$(echo "$ALL_FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
 
       - name: Cek folder saat ini di index.html
         id: read_html
@@ -52,7 +55,7 @@ jobs:
           # Generate daftar folder untuk HTML
           UPDATED_FOLDER_LIST=""
 
-          # Tambahkan folder yang ada ke list
+          # Tambahkan folder yang ada ke list, termasuk subfolder dari mini-projects
           for folder in ${{ env.folders }}; do
             folder_clean=$(echo "$folder" | tr '[:upper:]' '[:lower:]' | sed 's/^[ \t]*//;s/[ \t]*$//')  # Normalisasi nama folder
             UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST<li><a href=\"$folder_clean/\">$folder</a></li>\n"
