@@ -36,27 +36,4 @@ jobs:
           > $README_FILE
 
           # Salin konten template ke file README.md
-          cp $TEMPLATE_FILE $README_FILE
-
-          # Generate daftar folder untuk Markdown dalam bentuk tabel dengan icon
-          UPDATED_FOLDER_LIST=""
-          ICON="📁"  # Icon untuk folder
-          for folder in ${{ env.folders }}; do
-            UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST| $ICON | [$folder]($folder/) |\n"
-          done
-
-          # Gantikan placeholder dengan daftar folder yang diperbarui di README.md
-          sed -i "s|<!-- FOLDER_LIST_PLACEHOLDER -->|$UPDATED_FOLDER_LIST|" $README_FILE
-
-          # Periksa jika tidak ada perubahan pada README.md
-          if git diff --quiet; then
-            echo "Tidak ada perubahan pada README.md. Melewatkan commit."
-            exit 0
-          fi
-
-          # Commit dan push perubahan
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-          git add $README_FILE
-          git commit -m "Perbarui README.md dengan daftar folder terbaru"
-          git push
+          cp $T
