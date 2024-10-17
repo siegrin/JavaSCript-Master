@@ -23,9 +23,9 @@ jobs:
       - name: Check current folders in index.html
         id: read_html
         run: |
-          # Ambil semua folder yang sudah ada di index.html, case-insensitive, dan konversikan semuanya ke lowercase
+          # Ambil semua folder yang sudah ada di index.html, case-insensitive
           if grep -q '<a href="' index.html; then
-            CURRENT_FOLDERS=$(grep -ioP '(?<=<a href=\").*?(?=\/\")' index.html | tr '[:upper:]' '[:lower:]')
+            CURRENT_FOLDERS=$(grep -ioP '(?<=<a href=\").*?(?=\/\")' index.html)
           else
             CURRENT_FOLDERS=""
           fi
@@ -42,25 +42,24 @@ jobs:
           # Generate updated folder list for HTML
           UPDATED_FOLDER_LIST=""
 
-          # Konversikan daftar folder dari repository ke lowercase
-          FOLDERS=$(echo "${{ env.folders }}" | tr '[:upper:]' '[:lower:]')
-
           # Tambahkan folder yang ada di repository tapi belum ada di index.html (case-insensitive)
-          for folder in $FOLDERS; do
+          for folder in ${{ env.folders }}; do
             if [[ ! " ${current_folders} " =~ " ${folder} " ]]; then
               UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST<li><a href=\"$folder/\">${folder}</a></li>\n"
             fi
           done
 
-          # Cek folder yang ada di index.html tapi sudah tidak ada di repository, lalu hapus
+          # Hapus folder yang tidak ada di repository dari index.html
           TEMP_INDEX_HTML=$(mktemp)
+
+          # Loop untuk mengecek dan hanya menyimpan folder yang masih ada
           while read -r folder; do
-            if [[ " ${folders} " =~ " ${folder} " ]]; then
+            if [[ " ${{ env.folders }} " =~ " ${folder} " ]]; then
               echo "<li><a href=\"$folder/\">${folder}</a></li>" >> "$TEMP_INDEX_HTML"
             else
-              echo "Removing folder $folder from index.html."
+              echo "Menghapus folder $folder dari index.html."
             fi
-          done < <(grep -ioP '(?<=<a href=\").*?(?=\/\")' index.html | tr '[:upper:]' '[:lower:]')
+          done < <(grep -ioP '(?<=<a href=\").*?(?=\/\")' index.html)
 
           # Gantikan placeholder dengan daftar folder yang diperbarui di index.html
           sed -i.bak "/<!-- FOLDER_LIST_PLACEHOLDER -->/r $TEMP_INDEX_HTML" index.html
