@@ -50,7 +50,10 @@ jobs:
           cp $TEMPLATE_FILE $OUTPUT_FILE
 
           # Generate daftar folder untuk Markdown
-          UPDATED_FOLDER_LIST="| 🗂️ Folder | 📖 Deskripsi |\n|--------|-----------|\n"
+          UPDATED_FOLDER_LIST=""
+
+          # Tambahkan folder yang ada ke list dalam bentuk tabel
+          UPDATED_FOLDER_LIST="| Folder | Deskripsi |\n|--------|-----------|\n"
           for folder in ${{ env.folders }}; do
             folder_clean=$(echo "$folder" | tr '[:upper:]' '[:lower:]' | sed 's/^[ \t]*//;s/[ \t]*$//')  # Normalisasi nama folder
             # Gantikan 'Deskripsi' dengan deskripsi yang sesuai jika ada
