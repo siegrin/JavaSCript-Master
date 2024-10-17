@@ -17,10 +17,10 @@ jobs:
         id: get_folders
         run: |
           # Mendapatkan semua folder kecuali .github dan node_modules
-          # Sertakan folder dari direktori mini-projects
-          FOLDERS=$(find . -type d -not -path "./.github/*" -not -path "./node_modules/*" -not -path "." -not -path "./mini-projects/*" | sed 's|^\./||')
-          MINI_PROJECTS_FOLDERS=$(find mini-projects/* -type d -not -path "mini-projects/*/.*" | sed 's|^\./||')
-          ALL_FOLDERS="$FOLDERS $MINI_PROJECTS_FOLDERS"
+          # Sertakan folder dari direktori mini-project
+          FOLDERS=$(find . -type d -not -path "./.github/*" -not -path "./node_modules/*" -not -path "." -not -path "./mini-project/*" | sed 's|^\./||')
+          MINI_PROJECT_FOLDERS=$(find mini-project/* -type d -not -path "mini-project/*/.*" | sed 's|^\./||')
+          ALL_FOLDERS="$FOLDERS $MINI_PROJECT_FOLDERS"
           echo "folders=$(echo "$ALL_FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
 
       - name: Cek folder saat ini di index.html
@@ -55,7 +55,7 @@ jobs:
           # Generate daftar folder untuk HTML
           UPDATED_FOLDER_LIST=""
 
-          # Tambahkan folder yang ada ke list, termasuk subfolder dari mini-projects
+          # Tambahkan folder yang ada ke list, termasuk subfolder dari mini-project
           for folder in ${{ env.folders }}; do
             folder_clean=$(echo "$folder" | tr '[:upper:]' '[:lower:]' | sed 's/^[ \t]*//;s/[ \t]*$//')  # Normalisasi nama folder
             UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST<li><a href=\"$folder_clean/\">$folder</a></li>\n"
