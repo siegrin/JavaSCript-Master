@@ -23,9 +23,9 @@ jobs:
       - name: Check current folders in index.html
         id: read_html
         run: |
-          # Ambil semua folder yang sudah ada di index.html, case-insensitive
+          # Ambil semua folder yang sudah ada di index.html secara case-insensitive
           if grep -q '<a href="' index.html; then
-            CURRENT_FOLDERS=$(grep -ioP '(?<=<a href=\").*?(?=\/\")' index.html)
+            CURRENT_FOLDERS=$(grep -ioP '(?<=<a href=\").*?(?=\/\")' index.html | tr '[:upper:]' '[:lower:]')
           else
             CURRENT_FOLDERS=""
           fi
@@ -44,7 +44,8 @@ jobs:
 
           # Tambahkan folder yang ada di repository tapi belum ada di index.html (case-insensitive)
           for folder in ${{ env.folders }}; do
-            if [[ ! " ${current_folders} " =~ " ${folder} " ]]; then
+            folder_lower=$(echo "$folder" | tr '[:upper:]' '[:lower:]')
+            if [[ ! " ${current_folders} " =~ " ${folder_lower} " ]]; then
               UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST<li><a href=\"$folder/\">${folder}</a></li>\n"
             fi
           done
@@ -54,7 +55,8 @@ jobs:
 
           # Loop untuk mengecek dan hanya menyimpan folder yang masih ada
           while read -r folder; do
-            if [[ " ${{ env.folders }} " =~ " ${folder} " ]]; then
+            folder_lower=$(echo "$folder" | tr '[:upper:]' '[:lower:]')
+            if [[ " ${{ env.folders }} " =~ " ${folder_lower} " ]]; then
               echo "<li><a href=\"$folder/\">${folder}</a></li>" >> "$TEMP_INDEX_HTML"
             else
               echo "Menghapus folder $folder dari index.html."
