@@ -62,8 +62,6 @@ jobs:
             folder_lower=$(echo "$folder" | tr '[:upper:]' '[:lower:]')
             if [[ " ${existing_folders[@]} " =~ " ${folder_lower} " ]]; then
               echo "<li><a href=\"$folder/\">${folder}</a></li>" >> "$TEMP_INDEX_HTML"
-            else
-              echo "Menghapus folder $folder dari index.html."
             fi
           done < <(grep -ioP '(?<=<a href=\").*?(?=\/\")' index.html)
 
@@ -72,6 +70,7 @@ jobs:
           
           # Tambahkan folder baru yang belum ada, jika ada
           if [ -n "$UPDATED_FOLDER_LIST" ]; then
+            # Tambahkan daftar folder yang baru di atas placeholder
             sed -i.bak "s|<!-- FOLDER_LIST_PLACEHOLDER -->|<!-- FOLDER_LIST_PLACEHOLDER -->\n$UPDATED_FOLDER_LIST|" index.html
           fi
 
