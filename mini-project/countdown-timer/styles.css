@@ -1,0 +1,64 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.time-container {
+    text-align: center;
+    background-color: #fff;
+    padding: 2.5rem;
+    border-radius: .5rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .2);
+    max-width: 20rem;
+    width: 90%;
+}
+
+h1 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 1.2rem;
+}
+
+.countdown {
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.input-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: .5rem;
+}
+
+input {
+    padding: 10px;
+    font-size: .8rem;
+    border: 2px solid #00aaff;
+    border-radius: .3rem;
+    width: 3.5rem;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+button {
+    background-color: #00aaff;
+    color: white;
+    padding: .5rem 1rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: .3rem;
+    cursor: pointer;
+    transition: background-color .3s ease;
+}
+
+button:hover {
+    background-color: #0077cc;
+}

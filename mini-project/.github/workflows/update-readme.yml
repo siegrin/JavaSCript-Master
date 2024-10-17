@@ -1,0 +1,74 @@
+name: Perbarui README.md dengan Folder
+
+on:
+  push:
+    paths:
+      - 'README.md'  # Memicu saat README.md diubah
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repositori
+        uses: actions/checkout@v2
+
+      - name: Ambil semua folder
+        id: get_folders
+        run: |
+          # Mendapatkan semua folder kecuali .github dan node_modules
+          FOLDERS=$(ls -d */ | grep -v '\.github\|node_modules' | sed 's/\/$//')
+          echo "folders=$(echo "$FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
+
+      - name: Cek folder saat ini di README.md
+        id: read_readme
+        run: |
+          # Ambil semua folder yang sudah ada di README.md secara case-insensitive
+          if grep -q '\[.*\]\(.*\)' README.md; then
+            CURRENT_FOLDERS=$(grep -oP '\[(.*?)\]\(\K.*?(?=\)' README.md | tr '[:upper:]' '[:lower:]' | sort -u)
+          else
+            CURRENT_FOLDERS=""
+          fi
+          echo "current_folders=$(echo "$CURRENT_FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
+
+      - name: Reset dan sinkronkan folder di README.md
+        run: |
+          # Jika tidak ada folder dalam repositori, keluar
+          if [ -z "${{ env.folders }}" ]; then
+            echo "Tidak ada folder yang ditemukan di repositori."
+            exit 0
+          fi
+
+          # Baca template dari template.md
+          TEMPLATE_FILE="template.md"
+          OUTPUT_FILE="README.md"
+
+          # Hapus isi file README.md
+          > $OUTPUT_FILE
+
+          # Salin konten template ke file README.md
+          cp $TEMPLATE_FILE $OUTPUT_FILE
+
+          # Generate daftar folder untuk Markdown
+          UPDATED_FOLDER_LIST=""
+          # Tambahkan folder yang ada ke list
+          for folder in ${{ env.folders }}; do
+            folder_clean=$(echo "$folder" | tr '[:upper:]' '[:lower:]' | sed 's/^[ \t]*//;s/[ \t]*$//')  # Normalisasi nama folder
+            UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST- 🗂️[$folder](./$folder)\n"
+          done
+
+          # Gantikan placeholder dengan daftar folder yang diperbarui di README.md
+          sed -i.bak "s|<!-- FOLDER_LIST_PLACEHOLDER -->|$UPDATED_FOLDER_LIST|" $OUTPUT_FILE
+
+          # Cek jika tidak ada perubahan pada README.md
+          if git diff --quiet; then
+            echo "Tidak ada perubahan pada README.md. Melewatkan commit."
+            exit 0
+          fi
+
+          # Commit dan push perubahan
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add $OUTPUT_FILE
+          git commit -m "Reset dan sinkronkan folder di README.md dengan repositori"
+          git push
