@@ -55,10 +55,11 @@ jobs:
           # Cek folder yang ada di index.html tapi sudah tidak ada di repository, lalu hapus
           TEMP_INDEX_HTML=$(mktemp)
           while read -r folder; do
-            if [[ " ${folders} " =~ " ${folder} " ]]; then
+            if [[ " ${FOLDERS} " =~ " ${folder} " ]]; then
               echo "<li><a href=\"$folder/\">${folder}</a></li>" >> "$TEMP_INDEX_HTML"
             else
-              echo "Removing folder $folder from index.html."
+              # Jika folder tidak ada di repository, hapus dari index.html
+              echo "Menghapus folder $folder dari index.html."
             fi
           done < <(grep -ioP '(?<=<a href=\").*?(?=\/\")' index.html | tr '[:upper:]' '[:lower:]')
 
