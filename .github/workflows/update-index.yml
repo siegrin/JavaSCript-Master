@@ -41,12 +41,11 @@ jobs:
 
           # Baca template dari template.html
           TEMPLATE_FILE="template.html"
-          # Iterasi untuk setiap folder dan perbarui index.html
-          for folder in ${{ env.folders }}; do
-            OUTPUT_FILE="$folder/index.html"
-            # Hapus isi file index.html
-            > $OUTPUT_FILE
-            
+          OUTPUT_FILE="index.html"
+
+          # Hapus isi file index.html
+          > $OUTPUT_FILE
+
           # Salin konten template ke file index.html
           cp $TEMPLATE_FILE $OUTPUT_FILE
 
