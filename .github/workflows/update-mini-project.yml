@@ -1,5 +1,4 @@
-name: Perbarui HTML dengan Folder
-
+name: Perbarui HTML Mini-Project
 on:
   push:
     paths:
