@@ -39,13 +39,20 @@ jobs:
             exit 0
           fi
 
+          # Ambil daftar folder dari repository dan ubah menjadi lowercase untuk perbandingan case-insensitive
+          FOLDER_LIST=""
+          for folder in ${{ env.folders }}; do
+            folder_lower=$(echo "$folder" | tr '[:upper:]' '[:lower:]')
+            FOLDER_LIST="$FOLDER_LIST $folder_lower"
+          done
+
           # Generate updated folder list for HTML
           UPDATED_FOLDER_LIST=""
 
           # Tambahkan folder yang ada di repository tapi belum ada di index.html (case-insensitive)
           for folder in ${{ env.folders }}; do
             folder_lower=$(echo "$folder" | tr '[:upper:]' '[:lower:]')
-            if [[ ! " ${current_folders} " =~ " ${folder_lower} " ]]; then
+            if [[ ! " ${CURRENT_FOLDERS} " =~ " ${folder_lower} " ]]; then
               UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST<li><a href=\"$folder/\">${folder}</a></li>\n"
             fi
           done
@@ -53,10 +60,10 @@ jobs:
           # Hapus folder yang tidak ada di repository dari index.html
           TEMP_INDEX_HTML=$(mktemp)
 
-          # Loop untuk mengecek dan hanya menyimpan folder yang masih ada
+          # Baca folder dari index.html dan hapus yang tidak ada di repository
           while read -r folder; do
             folder_lower=$(echo "$folder" | tr '[:upper:]' '[:lower:]')
-            if [[ " ${{ env.folders }} " =~ " ${folder_lower} " ]]; then
+            if [[ " $FOLDER_LIST " =~ " ${folder_lower} " ]]; then
               echo "<li><a href=\"$folder/\">${folder}</a></li>" >> "$TEMP_INDEX_HTML"
             else
               echo "Menghapus folder $folder dari index.html."
