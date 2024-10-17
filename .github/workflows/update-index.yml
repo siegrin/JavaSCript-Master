@@ -42,6 +42,14 @@ jobs:
           # Generate updated folder list for HTML
           UPDATED_FOLDER_LIST=""
 
+          # Tambahkan folder yang ada di repository tapi belum ada di index.html (case-insensitive)
+          for folder in ${{ env.folders }}; do
+            folder_lower=$(echo "$folder" | tr '[:upper:]' '[:lower:]')
+            if [[ ! " ${current_folders} " =~ " ${folder_lower} " ]]; then
+              UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST<li><a href=\"$folder/\">${folder}</a></li>\n"
+            fi
+          done
+
           # Hapus folder yang tidak ada di repository dari index.html
           TEMP_INDEX_HTML=$(mktemp)
 
@@ -55,17 +63,9 @@ jobs:
             fi
           done < <(grep -ioP '(?<=<a href=\").*?(?=\/\")' index.html)
 
-          # Tambahkan folder baru yang belum ada
-          for folder in ${{ env.folders }}; do
-            folder_lower=$(echo "$folder" | tr '[:upper:]' '[:lower:]')
-            if [[ ! " ${CURRENT_FOLDERS} " =~ " ${folder_lower} " ]]; then
-              UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST<li><a href=\"$folder/\">${folder}</a></li>\n"
-            fi
-          done
-
           # Gantikan placeholder dengan daftar folder yang diperbarui di index.html
           sed -i.bak "/<!-- FOLDER_LIST_PLACEHOLDER -->/r $TEMP_INDEX_HTML" index.html
-
+          
           # Tambahkan folder baru yang belum ada, jika ada
           if [ -n "$UPDATED_FOLDER_LIST" ]; then
             sed -i.bak "s|<!-- FOLDER_LIST_PLACEHOLDER -->|<!-- FOLDER_LIST_PLACEHOLDER -->\n$UPDATED_FOLDER_LIST|" index.html
@@ -83,3 +83,12 @@ jobs:
           git add index.html
           git commit -m "Sync folders in index.html with repository"
           git push
+
+bagaiamana agartidak terjadi duplikasi dan melakukan pengecekan di index html
+jika ada contohnya 
+<li><a href="mini-project/">mini-project</a></li>
+
+
+
+<li><a href="mini-project/">mini-project</a></li>
+ingat pada ini nya maka tidak perlu di tambahkan lagi dan cuman folder yangg belum ada di tambahkan
