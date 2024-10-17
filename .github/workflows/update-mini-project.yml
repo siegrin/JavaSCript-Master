@@ -18,56 +18,52 @@ jobs:
         run: |
           # Mengambil semua folder hanya dari direktori mini-project
           FOLDERS=$(find mini-project -mindepth 1 -type d | sed 's|^mini-project/||')
+          echo "Ditemukan folder: $FOLDERS"  # Debugging output
           echo "folders=$(echo "$FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
 
       - name: Cek folder saat ini di index.html
         id: read_html
         run: |
-          # Ambil semua folder yang sudah ada di index.html secara case-insensitive
           if grep -q '<a href="' mini-project/index.html; then
             CURRENT_FOLDERS=$(grep -ioP '(?<=<a href=\").*?(?=\/\")' mini-project/index.html | tr '[:upper:]' '[:lower:]' | sort -u)
+            echo "Folder saat ini di index.html: $CURRENT_FOLDERS"  # Debugging output
           else
             CURRENT_FOLDERS=""
+            echo "Tidak ada folder di index.html."
           fi
           echo "current_folders=$(echo "$CURRENT_FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
 
       - name: Reset dan sinkronkan folder di index.html
         run: |
-          # Jika tidak ada folder dalam repositori, keluar
           if [ -z "${{ env.folders }}" ]; then
             echo "Tidak ada folder yang ditemukan di repositori."
             exit 0
           fi
 
-          # Baca template dari template.html
           TEMPLATE_FILE="template.html"
           OUTPUT_FILE="mini-project/index.html"
 
-          # Hapus isi file index.html
           > $OUTPUT_FILE
-
-          # Salin konten template ke file index.html
           cp $TEMPLATE_FILE $OUTPUT_FILE
 
-          # Generate daftar folder untuk HTML
           UPDATED_FOLDER_LIST=""
-
-          # Tambahkan folder yang ada ke list, hanya dari mini-project
           for folder in ${{ env.folders }}; do
-            folder_clean=$(echo "$folder" | tr '[:upper:]' '[:lower:]' | sed 's/^[ \t]*//;s/[ \t]*$//')  # Normalisasi nama folder
+            folder_clean=$(echo "$folder" | tr '[:upper:]' '[:lower:]' | sed 's/^[ \t]*//;s/[ \t]*$//')
             UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST<li><a href=\"$folder_clean/\">$folder</a></li>\n"
           done
 
-          # Gantikan placeholder dengan daftar folder yang diperbarui di index.html
+          echo "Mengganti placeholder di index.html"  # Debugging output
           sed -i.bak "s|<!-- FOLDER_LIST_PLACEHOLDER -->|$UPDATED_FOLDER_LIST|" $OUTPUT_FILE
 
-          # Cek jika tidak ada perubahan pada index.html
+          # Debugging: Tampilkan isi file setelah penggantian
+          echo "Isi file setelah penggantian:"
+          cat $OUTPUT_FILE
+
           if git diff --quiet; then
             echo "Tidak ada perubahan pada index.html. Melewatkan commit."
             exit 0
           fi
 
-          # Commit dan push perubahan
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git add $OUTPUT_FILE
