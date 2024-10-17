@@ -83,12 +83,3 @@ jobs:
           git add index.html
           git commit -m "Sync folders in index.html with repository"
           git push
-
-bagaiamana agartidak terjadi duplikasi dan melakukan pengecekan di index html
-jika ada contohnya 
-<li><a href="mini-project/">mini-project</a></li>
-
-
-
-<li><a href="mini-project/">mini-project</a></li>
-ingat pada ini nya maka tidak perlu di tambahkan lagi dan cuman folder yangg belum ada di tambahkan
