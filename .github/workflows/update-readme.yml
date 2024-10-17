@@ -56,9 +56,11 @@ jobs:
             exit 0
           fi
 
-          # Commit dan push perubahan
+          # Konfigurasi Git untuk melakukan commit
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
+
+          # Commit dan push perubahan
           git add $OUTPUT_README
           git commit -m "Reset dan sinkronkan daftar folder di README.md dengan repositori"
           git push
