@@ -58,7 +58,7 @@ jobs:
             else
               echo "Removing folder $folder from README.md."
             fi
-          done < <(grep -oP '(\w|-|_)+' README.md)
+          done < <(grep -oP '(?<=<a href=\").*?(?=\/\")' README.md)
 
           # Gantikan placeholder dengan daftar folder yang diperbarui di README.md
           sed -i.bak "/<!-- FOLDER_LIST_PLACEHOLDER -->/r $TEMP_README" README.md
