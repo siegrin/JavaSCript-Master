@@ -1,3 +1,5 @@
-# Project Title
+# Daftar Folder
 
-Ini cuman Project kecil kecilan
+Berikut adalah daftar folder yang ada di repositori:
+
+<!-- FOLDER_LIST_PLACEHOLDER -->
