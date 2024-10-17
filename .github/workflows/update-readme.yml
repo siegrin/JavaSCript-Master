@@ -54,7 +54,7 @@ jobs:
           # Tambahkan folder yang ada ke list
           for folder in ${{ env.folders }}; do
             folder_clean=$(echo "$folder" | tr '[:upper:]' '[:lower:]' | sed 's/^[ \t]*//;s/[ \t]*$//')  # Normalisasi nama folder
-            UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST- 🗂️[$folder](./$folder)\n"
+            UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST |[$folder]|🗂️[$folder](./$folder)|\n"
           done
 
           # Gantikan placeholder dengan daftar folder yang diperbarui di README.md
