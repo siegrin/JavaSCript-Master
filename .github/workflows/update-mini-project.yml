@@ -3,7 +3,7 @@ name: Perbarui HTML dengan Folder
 on:
   push:
     paths:
-      - '**/*'  # Memicu workflow saat ada perubahan di folder manapun
+      - 'mini-projects/**'  # Memicu workflow saat ada perubahan di folder mini-projects
 
 jobs:
   update-html:
