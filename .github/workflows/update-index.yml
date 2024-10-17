@@ -71,11 +71,13 @@ jobs:
           done < <(grep -ioP '(?<=<a href=\").*?(?=\/\")' index.html)
 
           # Tambahkan daftar folder baru tepat di atas <!-- FOLDER_LIST_PLACEHOLDER -->
-          sed -i.bak "/<!-- FOLDER_LIST_PLACEHOLDER -->/i $UPDATED_FOLDER_LIST" index.html
+          if [ -n "$UPDATED_FOLDER_LIST" ]; then
+            sed -i.bak "/<!-- FOLDER_LIST_PLACEHOLDER -->/i $UPDATED_FOLDER_LIST" index.html
+          fi
 
-          # Pastikan placeholder tetap berada di posisi setelah folder yang sudah ada
-          sed -i.bak '/<!-- FOLDER_LIST_PLACEHOLDER -->/!b;n;c <!-- FOLDER_LIST_PLACEHOLDER -->' index.html
-
+          # Pastikan placeholder tetap berada di posisi yang tepat dan hanya satu
+          sed -i.bak -e '/<!-- FOLDER_LIST_PLACEHOLDER -->/!b;n;c <!-- FOLDER_LIST_PLACEHOLDER -->' index.html
+          
           # Cek jika tidak ada perubahan pada index.html
           if git diff --quiet; then
             echo "No changes to index.html. Skipping commit."
