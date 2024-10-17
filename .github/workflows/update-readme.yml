@@ -1,36 +1,3 @@
-name: Update README with Folders
-
-on:
-  push:
-    paths:
-      - '**/*'  # Memicu workflow saat ada perubahan di folder manapun
-
-jobs:
-  update-readme:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Get all folders
-        id: get_folders
-        run: |
-          # Mendapatkan semua folder kecuali .github dan node_modules, lalu menghapus trailing slash
-          FOLDERS=$(ls -d */ | grep -v '\.github\|node_modules' | sed 's/\/$//')
-          echo "folders=$(echo "$FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
-
-      - name: Check current folders in README.md
-        id: read_readme
-        run: |
-          # Ambil semua folder yang sudah ada di README.md
-          if grep -q '| ' README.md; then
-            CURRENT_FOLDERS=$(grep -oP '(\w|-|_)+(?=\s*\|)' README.md)
-          else
-            CURRENT_FOLDERS=""
-          fi
-          echo "current_folders=$(echo "$CURRENT_FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
-
       - name: Sync folders in README.md
         run: |
           # Jika tidak ada folder dalam repository, keluar
@@ -45,10 +12,13 @@ jobs:
           # Tambahkan header tabel
           UPDATED_FOLDER_LIST="| Folder | Description |\n|--------|-------------|\n"
 
-          # Tambahkan folder yang ada di repository tapi belum ada di README.md
+          # Filter nama folder yang valid dan hilangkan karakter khusus
           for folder in ${{ env.folders }}; do
-            if [[ ! " ${current_folders} " =~ " ${folder} " ]]; then
+            # Cek jika nama folder valid (tidak ada karakter yang bermasalah)
+            if [[ "$folder" =~ ^[a-zA-Z0-9._-]+$ ]]; then
               UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST| :file_folder: [$folder](./$folder) | Description for $folder |\n"
+            else
+              echo "Skipping folder $folder due to invalid name."
             fi
           done
 
