@@ -1,4 +1,4 @@
-name: Perbarui README
+name: Perbarui README dengan Daftar Folder dan Ikon
 
 on:
   push:
@@ -20,35 +20,26 @@ jobs:
           FOLDERS=$(ls -d */ | grep -v '\.github\|node_modules' | sed 's/\/$//')
           echo "folders=$(echo "$FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
 
-      - name: Reset dan sinkronkan daftar folder di README.md
+      - name: Reset dan perbarui README.md
         run: |
-          # Jika tidak ada folder dalam repositori, keluar
-          if [ -z "${{ env.folders }}" ]; then
-            echo "Tidak ada folder yang ditemukan di repositori."
-            exit 0
-          fi
-
-          # Baca template dari template.md
+          README_FILE="README.md"
           TEMPLATE_FILE="template.md"
-          OUTPUT_README="README.md"
 
-          # Hapus isi file README.md
-          > $OUTPUT_README
+          # Buat ulang konten README.md berdasarkan template.md
+          cp $TEMPLATE_FILE $README_FILE
 
-          # Salin konten template ke file README.md
-          cp $TEMPLATE_FILE $OUTPUT_README
+          # Menentukan ikon untuk setiap folder (gunakan emoji atau ikon dari Font Awesome)
+          ICON="📂"  # Gunakan emoji default
 
           # Generate daftar folder untuk README.md
           UPDATED_FOLDER_LIST=""
 
-          # Tambahkan folder yang ada ke list
           for folder in ${{ env.folders }}; do
-            folder_clean=$(echo "$folder" | tr '[:upper:]' '[:lower:]' | sed 's/^[ \t]*//;s/[ \t]*$//')  # Normalisasi nama folder
-            UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST- 📁 [$folder](./$folder_clean)\n"
+            UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST| $ICON $folder | Deskripsi folder $folder |\n"
           done
 
           # Gantikan placeholder dengan daftar folder yang diperbarui di README.md
-          sed -i.bak "s|<!-- FOLDER_LIST_PLACEHOLDER -->|$UPDATED_FOLDER_LIST|" $OUTPUT_README
+          sed -i.bak "s|<!-- FOLDER_LIST_PLACEHOLDER -->|$UPDATED_FOLDER_LIST|" $README_FILE
 
           # Cek jika tidak ada perubahan pada README.md
           if git diff --quiet; then
@@ -56,11 +47,9 @@ jobs:
             exit 0
           fi
 
-          # Konfigurasi Git untuk melakukan commit
+          # Commit dan push perubahan
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-
-          # Commit dan push perubahan
-          git add $OUTPUT_README
-          git commit -m "Reset dan sinkronkan daftar folder di README.md dengan repositori"
+          git add $README_FILE
+          git commit -m "Perbarui README.md dengan daftar folder dan ikon"
           git push
