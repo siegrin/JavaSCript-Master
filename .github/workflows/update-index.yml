@@ -4,8 +4,6 @@ on:
   push:
     paths:
       - '**/*'  # Memicu workflow saat ada perubahan di folder manapun
-  schedule:
-    - cron: '*/5 * * * *'  # Opsional: Menjalankan setiap 5 menit
 
 jobs:
   update-html:
