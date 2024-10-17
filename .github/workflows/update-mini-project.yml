@@ -40,7 +40,7 @@ jobs:
           fi
 
           # Baca template dari template.html
-          TEMPLATE_FILE="template.html"
+          TEMPLATE_FILE="mini-project/template.html"
           OUTPUT_FILE="mini-project/index.html"
 
           # Hapus isi file index.html
