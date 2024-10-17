@@ -16,19 +16,16 @@ jobs:
       - name: Ambil semua folder
         id: get_folders
         run: |
-          # Mendapatkan semua folder kecuali .github dan node_modules
-          # Sertakan folder dari direktori mini-project
-          FOLDERS=$(find . -type d -not -path "./.github/*" -not -path "./node_modules/*" -not -path "." -not -path "./mini-project/*" | sed 's|^\./||')
-          MINI_PROJECT_FOLDERS=$(find mini-project/* -type d -not -path "mini-project/*/.*" | sed 's|^\./||')
-          ALL_FOLDERS="$FOLDERS $MINI_PROJECT_FOLDERS"
-          echo "folders=$(echo "$ALL_FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
+          # Mengambil semua folder hanya dari direktori mini-projects
+          FOLDERS=$(find mini-projects -mindepth 1 -type d | sed 's|^mini-projects/||')
+          echo "folders=$(echo "$FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
 
       - name: Cek folder saat ini di index.html
         id: read_html
         run: |
           # Ambil semua folder yang sudah ada di index.html secara case-insensitive
-          if grep -q '<a href="' index.html; then
-            CURRENT_FOLDERS=$(grep -ioP '(?<=<a href=\").*?(?=\/\")' index.html | tr '[:upper:]' '[:lower:]' | sort -u)
+          if grep -q '<a href="' mini-projects/index.html; then
+            CURRENT_FOLDERS=$(grep -ioP '(?<=<a href=\").*?(?=\/\")' mini-projects/index.html | tr '[:upper:]' '[:lower:]' | sort -u)
           else
             CURRENT_FOLDERS=""
           fi
@@ -44,7 +41,7 @@ jobs:
 
           # Baca template dari template.html
           TEMPLATE_FILE="template.html"
-          OUTPUT_FILE="mini-project/index.html"
+          OUTPUT_FILE="mini-projects/index.html"
 
           # Hapus isi file index.html
           > $OUTPUT_FILE
@@ -55,7 +52,7 @@ jobs:
           # Generate daftar folder untuk HTML
           UPDATED_FOLDER_LIST=""
 
-          # Tambahkan folder yang ada ke list, termasuk subfolder dari mini-project
+          # Tambahkan folder yang ada ke list, hanya dari mini-projects
           for folder in ${{ env.folders }}; do
             folder_clean=$(echo "$folder" | tr '[:upper:]' '[:lower:]' | sed 's/^[ \t]*//;s/[ \t]*$//')  # Normalisasi nama folder
             UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST<li><a href=\"$folder_clean/\">$folder</a></li>\n"
