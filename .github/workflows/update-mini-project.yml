@@ -1,4 +1,4 @@
-name: Perbarui HTML mini-projec
+name: Perbarui HTML Mini Project dengan Folder
 
 on:
   push:
@@ -16,22 +16,20 @@ jobs:
       - name: Ambil semua folder
         id: get_folders
         run: |
-          # Mengambil semua folder hanya dari direktori mini-project
-          FOLDERS=$(find mini-project -mindepth 1 -maxdepth 1 -type d | sed 's|^mini-project/||')
+          # Mendapatkan semua folder kecuali .github dan node_modules
+          FOLDERS=$(ls -d */ | grep -v '\.github\|node_modules' | sed 's/\/$//')
           echo "folders=$(echo "$FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
-          echo "Folder yang ditemukan: $FOLDERS"
 
       - name: Cek folder saat ini di index.html
         id: read_html
         run: |
-          # Ambil semua folder yang sudah ada di mini-project/index.html secara case-insensitive
-          if grep -q '<a href="' mini-project/index.html; then
-            CURRENT_FOLDERS=$(grep -ioP '(?<=<a href=\").*?(?=\/\")' mini-project/index.html | tr '[:upper:]' '[:lower:]' | sort -u)
+          # Ambil semua folder yang sudah ada di index.html secara case-insensitive
+          if grep -q '<a href="' index.html; then
+            CURRENT_FOLDERS=$(grep -ioP '(?<=<a href=\").*?(?=\/\")' index.html | tr '[:upper:]' '[:lower:]' | sort -u)
           else
             CURRENT_FOLDERS=""
           fi
           echo "current_folders=$(echo "$CURRENT_FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
-          echo "Folder saat ini di index.html: $CURRENT_FOLDERS"
 
       - name: Reset dan sinkronkan folder di index.html
         run: |
@@ -60,8 +58,6 @@ jobs:
             UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST<li><a href=\"$folder_clean/\">$folder</a></li>\n"
           done
 
-          echo "Daftar folder yang diperbarui: $UPDATED_FOLDER_LIST"
-
           # Gantikan placeholder dengan daftar folder yang diperbarui di index.html
           sed -i.bak "s|<!-- FOLDER_LIST_PLACEHOLDER -->|$UPDATED_FOLDER_LIST|" $OUTPUT_FILE
 
@@ -69,13 +65,11 @@ jobs:
           if git diff --quiet; then
             echo "Tidak ada perubahan pada index.html. Melewatkan commit."
             exit 0
-          else
-            echo "Perubahan terdeteksi pada index.html."
           fi
 
           # Commit dan push perubahan
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git add $OUTPUT_FILE
-          git commit -m "Reset dan sinkronkan folder di mini-project/index.html dengan repositori"
+          git commit -m "Reset dan sinkronkan folder di index.html dengan repositori"
           git push
