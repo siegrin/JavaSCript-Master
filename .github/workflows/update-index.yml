@@ -41,7 +41,7 @@ jobs:
 
           # Baca template dari template.html
           TEMPLATE_FILE="template.html"
-          OUTPUT_FILE="index.html"
+          OUTPUT_FILE="mini-project/index.html"
 
           # Hapus isi file index.html
           > $OUTPUT_FILE
