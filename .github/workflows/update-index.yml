@@ -25,7 +25,7 @@ jobs:
         run: |
           # Ambil semua folder yang sudah ada di index.html secara case-insensitive
           if grep -q '<a href="' index.html; then
-            CURRENT_FOLDERS=$(grep -ioP '(?<=<a href=\").*?(?=\/\")' index.html | tr '[:upper:]' '[:lower:]')
+            CURRENT_FOLDERS=$(grep -ioP '(?<=<a href=\").*?(?=\/\")' index.html | tr '[:upper:]' '[:lower:]' | sort -u)
           else
             CURRENT_FOLDERS=""
           fi
@@ -48,7 +48,8 @@ jobs:
             folder_lower=$(echo "$folder" | tr '[:upper:]' '[:lower:]')
             existing_folders["$folder_lower"]=1  # Simpan dalam associative array
 
-            if [[ ! " ${current_folders} " =~ " ${folder_lower} " ]]; then
+            # Hanya tambahkan jika folder belum ada di current_folders
+            if ! echo "${{ env.current_folders }}" | grep -q -i "^$folder_lower$"; then
               UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST<li><a href=\"$folder/\">${folder}</a></li>\n"
             fi
           done
@@ -59,7 +60,7 @@ jobs:
           # Loop untuk mengecek dan hanya menyimpan folder yang masih ada
           while read -r folder; do
             folder_lower=$(echo "$folder" | tr '[:upper:]' '[:lower:]')
-            if [[ "${existing_folders[$folder_lower]}" ]]; then
+            if [[ " ${existing_folders[@]} " =~ " ${folder_lower} " ]]; then
               echo "<li><a href=\"$folder/\">${folder}</a></li>" >> "$TEMP_INDEX_HTML"
             else
               echo "Menghapus folder $folder dari index.html."
