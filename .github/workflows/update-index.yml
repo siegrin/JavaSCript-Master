@@ -23,9 +23,9 @@ jobs:
       - name: Check current folders in index.html
         id: read_html
         run: |
-          # Ambil semua folder yang sudah ada di index.html
+          # Ambil semua folder yang sudah ada di index.html, dengan case-insensitive
           if grep -q '<a href="' index.html; then
-            CURRENT_FOLDERS=$(grep -oP '(?<=<a href=\").*?(?=\/\")' index.html)
+            CURRENT_FOLDERS=$(grep -ioP '(?<=<a href=\").*?(?=\/\")' index.html)
           else
             CURRENT_FOLDERS=""
           fi
@@ -42,9 +42,9 @@ jobs:
           # Generate updated folder list for HTML
           UPDATED_FOLDER_LIST=""
 
-          # Tambahkan folder yang ada di repository tapi belum ada di index.html
+          # Tambahkan folder yang ada di repository tapi belum ada di index.html (case-insensitive)
           for folder in ${{ env.folders }}; do
-            if [[ ! " ${current_folders} " =~ " ${folder} " ]]; then
+            if [[ ! " ${current_folders,,} " =~ " ${folder,,} " ]]; then
               UPDATED_FOLDER_LIST="$UPDATED_FOLDER_LIST<li><a href=\"$folder/\">${folder}</a></li>\n"
             fi
           done
@@ -52,12 +52,12 @@ jobs:
           # Cek folder yang ada di index.html tapi sudah tidak ada di repository, lalu hapus
           TEMP_INDEX_HTML=$(mktemp)
           while read -r folder; do
-            if [[ " ${folders} " =~ " ${folder} " ]]; then
+            if [[ " ${folders,,} " =~ " ${folder,,} " ]]; then
               echo "<li><a href=\"$folder/\">${folder}</a></li>" >> "$TEMP_INDEX_HTML"
             else
               echo "Removing folder $folder from index.html."
             fi
-          done < <(grep -oP '(?<=<a href=\").*?(?=\/\")' index.html)
+          done < <(grep -ioP '(?<=<a href=\").*?(?=\/\")' index.html)
 
           # Gantikan placeholder dengan daftar folder yang diperbarui di index.html
           sed -i.bak "/<!-- FOLDER_LIST_PLACEHOLDER -->/r $TEMP_INDEX_HTML" index.html
