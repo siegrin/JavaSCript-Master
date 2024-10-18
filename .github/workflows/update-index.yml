@@ -67,7 +67,11 @@ jobs:
             exit 0
           fi
 
-          # Commit tanpa konfigurasi manual user
+          # Set git config untuk identitas
+          git config --global user.name "siegrin"
+          git config --global user.email "piubitt@gmail.com"
+
+          # Commit dan push perubahan
           git add $OUTPUT_FILE
           git commit -m "Reset dan sinkronkan folder di index.html dengan repositori"
 
