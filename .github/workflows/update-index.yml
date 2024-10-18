@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repositori
         uses: actions/checkout@v2
 
       - name: Ambil semua folder
@@ -20,7 +20,7 @@ jobs:
           FOLDERS=$(ls -d */ | grep -v '\.github\|node_modules' | sed 's/\/$//')
           echo "folders=$(echo "$FOLDERS" | tr '\n' ' ')" >> $GITHUB_ENV
 
-      - name: Cek folder di index.html
+      - name: Cek folder saat ini di index.html
         id: read_html
         run: |
           # Ambil semua folder yang sudah ada di index.html secara case-insensitive
@@ -71,6 +71,5 @@ jobs:
           git config --global user.name "siegrin"
           git config --global user.email "piubitt@gmail.com"
           git add $OUTPUT_FILE
-          git commit -S -m "Reset dan sinkronkan folder di index.html dengan repositori"  # Gunakan -S untuk commit yang ditandatangani
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/siegrin/JavaScript-Master.git
-
+          git commit -m "Reset dan sinkronkan folder di index.html dengan repositori"
+          git push
