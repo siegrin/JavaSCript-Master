@@ -73,3 +73,7 @@ jobs:
           git add $OUTPUT_FILE
           git commit -m "Reset dan sinkronkan folder di index.html dengan repositori"
           git push
+          
+      - name: Push changes to GitHub
+        run: |
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/siegrin/Penghijauan.git
