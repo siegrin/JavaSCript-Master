@@ -67,13 +67,10 @@ jobs:
             exit 0
           fi
 
-          # Commit dan push perubahan
-          git config --global user.name "siegrin"
-          git config --global user.email "piubitt@gmail.com"
+          # Commit dan push perubahan tanpa konfigurasi manual user
           git add $OUTPUT_FILE
           git commit -m "Reset dan sinkronkan folder di index.html dengan repositori"
-          git push
-          
+
       - name: Push changes to GitHub
         run: |
           git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/siegrin/JavaScript-Master.git
