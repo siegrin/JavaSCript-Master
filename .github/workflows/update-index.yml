@@ -76,4 +76,4 @@ jobs:
           
       - name: Push changes to GitHub
         run: |
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/siegrin/Penghijauan.git
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/siegrin/JavaScript-Master.git
