@@ -67,7 +67,7 @@ jobs:
             exit 0
           fi
 
-          # Commit dan push perubahan tanpa konfigurasi manual user
+          # Commit tanpa konfigurasi manual user
           git add $OUTPUT_FILE
           git commit -m "Reset dan sinkronkan folder di index.html dengan repositori"
 
