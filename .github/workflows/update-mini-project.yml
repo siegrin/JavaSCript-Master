@@ -68,8 +68,8 @@ jobs:
           fi
 
           # Commit dan push perubahan
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
+          git config --global user.name "siegrin"
+          git config --global user.email "piubitt@gmail.com"
           git add $OUTPUT_FILE
           git commit -m "Reset dan sinkronkan folder di index.html dengan repositori"
           git push
