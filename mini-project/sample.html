@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Folder List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        article {
+            display: flex;
+            flex-wrap: wrap; /* Allow cards to wrap to the next line */
+            justify-content: center; /* Center the cards */
+            gap: 20px; /* Space between cards */
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin: 15px;
+            padding: 10px;
+            position: relative;
+            width: 100%; /* Set width to 100% for responsive design */
+            max-width: 400px; /* Set a max-width for the card */
+            height: 300px; /* Set height for card */
+            overflow: hidden; /* Hide overflow */
+        }
+
+        .card a {
+            text-decoration: none;
+            color: #333;
+            font-size: 18px; /* Font size for the link */
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        iframe {
+            width: 100%; /* Full width of the card */
+            height: 100%; /* Full height of the card */
+            border: none;
+            border-radius: 10px;
+            transform: scale(0.8); /* Scale down to 80% */
+            position: absolute; /* Position absolute to control placement */
+            top: 10%; /* Adjust position to center vertically */
+            left: 0; /* Align to the left */
+            overflow: hidden; /* Prevent scrolling */
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8); /* White background with transparency */
+            z-index: 1; /* On top of the iframe */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0; /* Initially hidden */
+            transition: opacity 0.3s ease; /* Smooth transition for hover effect */
+        }
+
+        .card:hover .overlay {
+            opacity: 1; /* Show overlay on hover */
+        }
+
+        .card:hover {
+            transform: scale(1.05); /* Scale card on hover */
+            transition: transform 0.3s ease; /* Smooth transition for scaling */
+        }
+    </style>
+</head>
+<body>
+    <h1>Project Folders</h1>
+    <article>
+        <div class="card">
+            <iframe src="calculator/index.html" title="Calculator Project" scrolling="no"></iframe>
+            <div class="overlay">View in new tab</div>
+            <a href="calculator/index.html" target="_blank">Open Calculator</a>
+        </div>
+        <div class="card">
+            <iframe src="color-picker/index.html" title="Color Picker Project" scrolling="no"></iframe>
+            <div class="overlay">View in new tab</div>
+            <a href="color-picker/index.html" target="_blank">Open Color Picker</a>
+        </div>
+        <div class="card">
+            <iframe src="countdown-timer/index.html" title="Countdown Timer Project" scrolling="no"></iframe>
+            <div class="overlay">View in new tab</div>
+            <a href="countdown-timer/index.html" target="_blank">Open Countdown Timer</a>
+        </div>
+        <div class="card">
+            <iframe src="random-quote-generator/index.html" title="Random Quote Generator Project" scrolling="no"></iframe>
+            <div class="overlay">View in new tab</div>
+            <a href="random-quote-generator/index.html" target="_blank">Open Random Quote Generator</a>
+        </div>
+    </article>
+</body>
+</html>

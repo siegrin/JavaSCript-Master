@@ -1,0 +1,121 @@
+ * {
+    box-sizing: border-box;
+ }
+
+ body {
+    font-family: 'Aria', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+ }
+
+ .container{
+    display: flex;
+    flex-direction: column;
+ }
+
+header {
+    text-align: center;
+    margin: 1.5rem;
+}
+
+header h1 {
+    color: #333;
+    font-size: 1.5rem;
+    margin-bottom: .5rem;
+}
+
+header h2 {
+    color: #666;
+    font-size: 1rem;
+    font-weight: 400;
+}
+
+.carousel-container {
+    position: relative;
+    max-width: 800px;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 1rem;
+    box-shadow: 0 8 16px rgba(0, 0, 0, .1);
+}
+.carousel-slide{
+    display: flex;
+    transition: transform 0.4s ease-in-out;
+}
+
+.carousel-slide img{
+    width: 100%;
+    border-radius: 1rem;
+}
+
+.prev-btn,
+.next-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-1rem);
+    background-color: rgba(255, 255, 255, 0.1);
+    color: rgb(0, 0, 0);
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding-inline-start: .6rem;
+    border-radius: .6rem;
+    z-index: 1;
+}
+
+.prev-btn {
+    left: .5rem;
+}
+
+.next-btn {
+    right: .5rem;
+}
+
+.prev-btn:hover,
+.next-btn:hover {
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+.carousel-indicators {
+    position: absolute;
+    bottom: 1.2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: center;
+    gap: .6rem;
+}
+
+.indicator {
+    width: .7rem;
+    height: .7rem;
+    background-color: rgba(255, 255, 255, .5);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color .3s ease;
+}
+
+.indicator.active {
+    background-color: rgba(255, 255, 255, .9);
+}
+.indicator:hover{
+    background-color: rgba(255,255,255,0.7);
+}
+
+@media (max-width: 768px){
+    .prev-btn, .next-btn {
+        font-size: 1.2rem;
+        padding: .5rem;
+    }
+
+    .indicator {
+        width: .6rem;
+        height: .6rem;
+    }
+}
